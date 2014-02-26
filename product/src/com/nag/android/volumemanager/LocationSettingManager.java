@@ -21,13 +21,6 @@ import android.text.format.DateFormat;
 import com.nag.android.volumemanager.VolumeManager.STATUS;
 
 class LocationSettingManager{
-	private static LocationSettingManager instance;
-	public static LocationSettingManager getInstance(Context context){
-		if(instance==null){
-			instance=new LocationSettingManager(context, new PreferenceHelper(context));
-		}
-		return instance;
-	}
 	public interface OnLocationAddedListener{
 		void OnLocationAdded(Location location);
 	}

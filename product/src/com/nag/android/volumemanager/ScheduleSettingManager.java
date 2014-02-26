@@ -11,32 +11,24 @@ public class ScheduleSettingManager {
 	private static final int HOUR_OF_A_DAY=24;
 	private final String PREF_SCHEDULE = "schedule_";
 	private final PreferenceHelper pref;
-	private static ScheduleSettingManager instance;
 	private final ArrayList<STATUS> schedules=new ArrayList<STATUS>();
 	private boolean enable=true;
 
-	public static ScheduleSettingManager getInstance(Context context){
-		if(instance==null){
-			instance=new ScheduleSettingManager(context);
-		}
-		return instance;
+	ScheduleSettingManager(Context context, PreferenceHelper pref){
+		this.pref=pref;
+		loadAll(context);
 	}
 
-	public STATUS getStatus(Context context){
+	public STATUS getStatus(){
 		if(enable){
 			return schedules.get(Calendar.getInstance().get(Calendar.HOUR));
 		}else{
 			return STATUS.uncontrol;
 		}
-//		return load(Calendar.getInstance().get(Calendar.HOUR));
 	}
 
 	public void setEnable(boolean value){
-		this.enable=enable;
-	}
-	private ScheduleSettingManager(Context context){
-		pref=new PreferenceHelper(context);
-		loadAll(context);
+		this.enable=value;
 	}
 
 	private void loadAll(Context contex){
@@ -48,6 +40,12 @@ public class ScheduleSettingManager {
 
 	private STATUS load(int hour){
 		return STATUS.valueOf(pref.getString(getKeyPrefSchedule(hour),STATUS.uncontrol.toString()));
+	}
+
+	public void saveAll(){
+		for(int i=0;i<HOUR_OF_A_DAY;++i){
+			save(i, schedules.get(i));
+		}
 	}
 
 	private void save(int hour, STATUS status){

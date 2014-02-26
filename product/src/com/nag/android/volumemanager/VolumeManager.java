@@ -1,12 +1,18 @@
 package com.nag.android.volumemanager;
 
+import com.nag.android.volumemanager.LocationHelper.OnLocationCollectedListener;
+
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.os.SystemClock;
 
-public class VolumeManager{
+public class VolumeManager implements OnLocationCollectedListener{
 	private final String PREF_STATUS = "pref_status";
 
 	private static VolumeManager instance;
@@ -23,34 +29,67 @@ public class VolumeManager{
 	
 	private final PreferenceHelper pref;
 	private final AudioManager audiomanager;
+	private final AlarmManager alarmmanager;
 
-	public enum STATUS {uncontrol, enable, manner, silent, auto};
+	public enum STATUS {uncontrol, enable, manner, silent, auto, follow};
 	public enum PRIORITY {schedulefirst, locationfirst, silentfirst, ringfirst};
-	private STATUS status;
+	private final LocationHelper locationhelper;
+	private final LocationSettingManager lsm;
+	private final ScheduleSettingManager ssm;
 	private PRIORITY priority=PRIORITY.schedulefirst;
+	private int frequentry=1;
 
 	public VolumeManager(Context context, PreferenceHelper pref){
 		this.pref=pref;
+		locationhelper=new LocationHelper(context);
+		lsm=new LocationSettingManager(context, pref);
+		ssm=new ScheduleSettingManager(context, pref);
+
 		audiomanager=(AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
+		alarmmanager=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
 	}
 
 	public PRIORITY getPriority(){
 		return priority;
 	}
 
+	boolean isAuto(){
+		return STATUS.auto.toString().equals(pref.getString(PREF_STATUS,STATUS.uncontrol.toString()));
+	}
+
 	public void setPriority(PRIORITY priority){
 		this.priority=priority;
 	}
 
-	public STATUS getStatus(Context context){
-		return status;
+	public void setEnableLocation(boolean value){
+		lsm.setEnable(value);
 	}
 
-	public boolean isAuto(){
-		return status==STATUS.auto;
+	public void setEnableSchedule(boolean value){
+		ssm.setEnable(value);
 	}
 
-	public STATUS getDeviceStatus(Context context){
+	public LocationSettingManager getLocationSettingManager(){
+		return lsm;
+	}
+
+	public ScheduleSettingManager getScheduleSettingManager(){
+		return ssm;
+	}
+
+	public int getfrequentry(){
+		return frequentry;
+	}
+
+	public void setFrequently(int frequentry){
+		this.frequentry=frequentry;
+	}
+	
+	private int getRepeatTime(){
+		return 1000*60*60/frequentry;
+	}
+
+	private STATUS getDeviceStatus(Context context){
 		switch(audiomanager.getRingerMode()){
 		case AudioManager.RINGER_MODE_NORMAL:
 			return STATUS.enable;
@@ -63,8 +102,18 @@ public class VolumeManager{
 		} 
 	}
 
+	public STATUS perform(Context context){
+		if(isAuto()){
+			perform(context, STATUS.auto);
+			return STATUS.auto;
+		}else{
+			return getDeviceStatus(context);
+		}
+	}
+
 	public void perform(Context context, STATUS status){
-		this.status=status;
+		pref.putString(PREF_STATUS, status.toString());// TODO Ç±ÇÍÇ≈Ç¢Ç¢ÇÃÅH
+		// TODO
 		switch(status){
 		case enable:
 			audiomanager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
@@ -77,16 +126,25 @@ public class VolumeManager{
 			break;
 		case uncontrol:
 			break;
-		case auto://perform have to be called after calculation
+		case auto:
+			alarmmanager.setRepeating( AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime()+getRepeatTime(), 0,
+					PendingIntent.getService(context, 0, new Intent(context, AutoReciever.class), 0));
+			break;
 		default:
 			throw new RuntimeException();
 		}
-		pref.putString(PREF_STATUS, status.toString());// TODO Ç±ÇÍÇ≈Ç¢Ç¢ÇÃÅH
 	}
 
-//	public void doAuto(Context context, Location location){
-//		perform(getProgrammedStatus(context, location));
-//	}
+	public void doAuto(Context context, OnFinishPerformListener listener){
+		locationhelper.start(this);
+	}
+
+	@Override
+	public void onFinishLocationCollection(Location location, RESULT result) {
+		if(result==RESULT.resultOK){
+			getProgrammedStatus( lsm.getStatus(location), ssm.getStatus());
+		}
+	}
 
 	private STATUS getMoreSilentStatus(STATUS st1, STATUS st2){
 		switch(st1){
@@ -129,13 +187,13 @@ public class VolumeManager{
 		}
 	}
 
-	STATUS getProgrammedStatus(Context context, Location location){
-		
-		return getProgrammedStatus(
-				LocationSettingManager.getInstance(context).getStatus(location),
-				ScheduleSettingManager.getInstance(context).getStatus(context));
-	}
-
+//	STATUS getProgrammedStatus(Context context, Location location){
+//		
+//		return getProgrammedStatus(
+//				LocationSettingManager.getInstance(context).getStatus(location),
+//				ScheduleSettingManager.getInstance(context).getStatus(context));
+//	}
+//
 	STATUS getProgrammedStatus(STATUS statusLocation, STATUS statusSchedule){
 		STATUS status=null;
 		switch(priority){

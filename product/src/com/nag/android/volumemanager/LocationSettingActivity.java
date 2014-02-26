@@ -1,12 +1,11 @@
 package com.nag.android.volumemanager;
 
-import com.nag.android.volumemanager.LocationCollector.OnFinishLocationCollectionListener;
+import com.nag.android.volumemanager.LocationHelper.OnLocationCollectedListener;
 import com.nag.android.volumemanager.LocationSettingManager.LocationData;
 import com.nag.android.volumemanager.LocationSettingManager.OnLocationAddedListener;
 import com.nag.android.volumemanager.VolumeManager.STATUS;
 
 import android.location.Location;
-import android.location.LocationListener;
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -19,18 +18,23 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-public class LocationSettingActivity extends Activity implements OnFinishLocationCollectionListener, OnLocationAddedListener, AdapterView.OnItemClickListener{
+public class LocationSettingActivity extends Activity implements OnLocationCollectedListener, OnLocationAddedListener, AdapterView.OnItemClickListener{
 
 	private static final int REQUEST_CODE=0x1234;
 	private LocationSettingManager lsm=null;
+	private final LocationHelper locationhelper;
 	private ArrayAdapter<LocationData> adapter;
+
+	LocationSettingActivity(){
+		locationhelper=new LocationHelper(this);
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_location_setting);
 
-		lsm=LocationSettingManager.getInstance(this);
+		lsm=VolumeManager.getInstance(this).getLocationSettingManager();
 		initAddButton();
 		initListView();
 	}
@@ -40,7 +44,8 @@ public class LocationSettingActivity extends Activity implements OnFinishLocatio
 			@Override
 			public void onClick(View v){
 				if(lsm.hasSpace()){
-					LocationCollector.getInstance(getApplicationContext()).start(LocationSettingActivity.this);
+//					LocationCollector.getInstance(getApplicationContext()).start(LocationSettingActivity.this);
+					locationhelper.start(LocationSettingActivity.this);
 				}else{
 					//TODO
 				}

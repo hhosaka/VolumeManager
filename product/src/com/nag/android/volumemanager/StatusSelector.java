@@ -14,20 +14,13 @@ import android.widget.Spinner;
 public class StatusSelector extends Spinner {
 
 	public interface OnStatusSelectedListener{
-		void OnSelected(STATUS status);
+		void OnSelected(int index, STATUS status);
 	}
 
 	private OnStatusSelectedListener listener=null;
+	private int index=0;
 	private final ArrayList<StatusPair> statuspairs=new ArrayList<StatusPair>();;
-
 	private ArrayAdapter<StatusPair> adapter=null;
-//	public static final StatusPair statuspairs[]={//title should be from resource
-//		new StatusPair("Enable",STATUS.enable),
-//		new StatusPair("Manner",STATUS.manner),
-//		new StatusPair("Silent",STATUS.silent),
-//		new StatusPair("Uncontrol",STATUS.uncontrol),
-//		new StatusPair("Auto",STATUS.auto)
-//	};
 
 	private int getIndex(STATUS status){
 		for(int i=0;i<statuspairs.size();++i){
@@ -49,7 +42,7 @@ public class StatusSelector extends Spinner {
 		setOnItemSelectedListener(new OnItemSelectedListener() { 
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-				if(listener!=null)listener.OnSelected(((StatusPair)((Spinner)parent).getSelectedItem()).getStatus());
+				if(listener!=null)listener.OnSelected(index, ((StatusPair)((Spinner)parent).getSelectedItem()).getStatus());
 			}
 			@Override
 			public void onNothingSelected(AdapterView<?> arg0) {
@@ -68,5 +61,8 @@ public class StatusSelector extends Spinner {
 
 	public void setOnStatusSelectedListener(OnStatusSelectedListener listener){
 		this.listener=listener;
+	}
+	public void setIndex(int index){
+		this.index=index;
 	}
 }

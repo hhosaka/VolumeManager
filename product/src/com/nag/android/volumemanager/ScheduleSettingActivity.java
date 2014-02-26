@@ -2,6 +2,7 @@ package com.nag.android.volumemanager;
 
 import java.util.ArrayList;
 
+import com.nag.android.volumemanager.StatusSelector.OnStatusSelectedListener;
 import com.nag.android.volumemanager.VolumeManager.STATUS;
 
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -26,7 +28,7 @@ public class ScheduleSettingActivity extends Activity implements AdapterView.OnI
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_schedule_setting);
 
-		ssm=ScheduleSettingManager.getInstance(this);
+		ssm=new ScheduleSettingManager(this, new PreferenceHelper(this));
 		initListView();
 	}
 
@@ -35,6 +37,21 @@ public class ScheduleSettingActivity extends Activity implements AdapterView.OnI
 		ListView lv =((ListView)findViewById(R.id.listViewLocation));
 		lv.setAdapter(adapter);
 		lv.setOnItemClickListener(this);
+		findViewById(R.id.buttonDone).setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View v){
+				ssm.saveAll();
+				finish();
+			}
+			
+		});
+		findViewById(R.id.buttonCancel).setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View v){
+				finish();
+			}
+			
+		});
 	}
 
 	@Override
@@ -60,11 +77,13 @@ public class ScheduleSettingActivity extends Activity implements AdapterView.OnI
 //		}
 	}
 
-	class InternalAdapter extends ArrayAdapter<STATUS>{
+	class InternalAdapter extends ArrayAdapter<STATUS> implements OnStatusSelectedListener{
 		private final LayoutInflater inflater;
+		private ArrayList<STATUS> schedules;
 
 		public InternalAdapter(Context context, ArrayList<STATUS>schedules) {
 			super(context, R.layout.layout_schedule_list_item, schedules);
+			this.schedules=schedules;
 			this.inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		}
 
@@ -74,8 +93,21 @@ public class ScheduleSettingActivity extends Activity implements AdapterView.OnI
 				convertView = inflater.inflate(R.layout.layout_schedule_list_item, null);
 			}
 			((TextView)convertView.findViewById(R.id.textHour)).setText(position+"Žž");
-			((StatusSelector)convertView.findViewById(R.id.buttonStatus)).setStatus(getItem(position));
+			StatusSelector s=((StatusSelector)convertView.findViewById(R.id.buttonStatus));
+			s.add("Enable",STATUS.enable);
+			s.add("Manner",STATUS.manner);
+			s.add("Silent",STATUS.silent);
+			s.add("Uncontrol",STATUS.uncontrol);
+			s.add("follow",STATUS.follow);
+			s.setStatus(getItem(position));
+			s.setIndex(position);
+			s.setOnStatusSelectedListener(this);
 			return convertView;
+		}
+
+		@Override
+		public void OnSelected(int index, STATUS status) {
+			schedules.set(index,status);
 		}
 	}
 	@Override

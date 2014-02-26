@@ -1,11 +1,6 @@
 package com.nag.android.volumemanager;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import com.nag.android.volumemanager.LocationCollector.OnFinishLocationCollectionListener.RESULT;
-import com.nag.android.volumemanager.LocationSettingManager.LocationData;
-import com.nag.android.volumemanager.VolumeManager.STATUS;
+import com.nag.android.volumemanager.LocationHelper.OnLocationCollectedListener.RESULT;
 
 import android.content.Context;
 import android.location.Location;
@@ -14,30 +9,23 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 
-public class LocationCollector implements LocationListener{
+public class LocationHelper implements LocationListener{
 	private static final double ACCEPTABLE_ACCURACY=20.0;
 	private static final int MAX_RETRY_COUNT=10;
-	private static LocationCollector instance;
 	private final LocationManager manager;
-	private OnFinishLocationCollectionListener listener;
+	private OnLocationCollectedListener listener;
 	private int retry;
 
-	public interface OnFinishLocationCollectionListener{
+	public interface OnLocationCollectedListener{
 		enum RESULT{resultOK,resultRetryError,resultDisabled};
 		void onFinishLocationCollection(Location location, RESULT result);
 	}
-	public static LocationCollector getInstance(Context context){
-		if(instance==null){
-			instance=new LocationCollector(context);
-		}
-		return instance;
-	}
 
-	private LocationCollector(Context context){
+	LocationHelper(Context context){
 		manager=(LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
 	}
 
-	public boolean start(OnFinishLocationCollectionListener listener){
+	public boolean start(OnLocationCollectedListener listener){
 		// TODO need lock?
 		retry=0;
 		this.listener=listener;

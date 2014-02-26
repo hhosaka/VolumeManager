@@ -31,12 +31,12 @@ public class EditLocationSettingsActivity extends Activity implements OnClickLis
 		index=getIntent().getIntExtra(PARAM_INDEX, 0);
 		((EditText) findViewById(R.id.textLocationName)).setText(getIntent().getStringExtra(PARAM_TITLE));
 		StatusSelector s=((StatusSelector)findViewById(R.id.buttonStatus));
-		s.setStatus(STATUS.valueOf(getIntent().getStringExtra(PARAM_STATUS)));
 		s.add("Enable",STATUS.enable);
 		s.add("Manner",STATUS.manner);
 		s.add("Silent",STATUS.silent);
 		s.add("Uncontrol",STATUS.uncontrol);
-		s.add("Auto",STATUS.auto);
+		s.setStatus(STATUS.valueOf(getIntent().getStringExtra(PARAM_STATUS)));
+		findViewById(R.id.buttonDone).setOnClickListener(this);
 	}
 
 	@Override

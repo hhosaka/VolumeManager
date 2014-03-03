@@ -7,25 +7,19 @@ import android.app.Activity;
 import android.content.Intent;
 import android.view.Menu;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
 
-public class EditLocationSettingsActivity extends Activity implements OnClickListener{
+public class EditLocationSettingsActivity extends Activity{
 	static final String PARAM_INDEX="param_index";
 	static final String PARAM_TITLE="param_title";
 	static final String PARAM_STATUS="param_status";
-	//title should be from resource
-	private static final StatusPair statuspairs[]={
-			new StatusPair("Enable",STATUS.enable),
-			new StatusPair("Manner",STATUS.manner),
-			new StatusPair("Silent",STATUS.silent),
-			new StatusPair("Uncontrol",STATUS.uncontrol),
-			new StatusPair("Auto",STATUS.auto)
-		};
 	private int index;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_edit_location_settings);
 
 		index=getIntent().getIntExtra(PARAM_INDEX, 0);
@@ -36,17 +30,24 @@ public class EditLocationSettingsActivity extends Activity implements OnClickLis
 		s.add("Silent",STATUS.silent);
 		s.add("Uncontrol",STATUS.uncontrol);
 		s.setStatus(STATUS.valueOf(getIntent().getStringExtra(PARAM_STATUS)));
-		findViewById(R.id.buttonDone).setOnClickListener(this);
-	}
+		findViewById(R.id.buttonDone).setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View v) {
+				Intent intent =new Intent();
+				intent.putExtra(PARAM_INDEX,index);
+				intent.putExtra(PARAM_TITLE,((EditText) findViewById(R.id.textLocationName)).getText().toString());
+				intent.putExtra(PARAM_STATUS,((StatusSelector)findViewById(R.id.buttonStatus)).getStatus().toString());
+				setResult(RESULT_OK, intent);
+				finish();
+			}
+		});
 
-	@Override
-	public void onClick(View arg0){
-		Intent intent =new Intent();
-		intent.putExtra(PARAM_INDEX,index);
-		intent.putExtra(PARAM_TITLE,((EditText) findViewById(R.id.textLocationName)).getText().toString());
-		intent.putExtra(PARAM_STATUS,((StatusSelector)findViewById(R.id.buttonStatus)).getStatus().toString());
-		setResult(RESULT_OK, intent);
-		finish();
+		findViewById(R.id.buttonCancel).setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View v) {
+				finish();
+			}
+		});
 	}
 
 	@Override

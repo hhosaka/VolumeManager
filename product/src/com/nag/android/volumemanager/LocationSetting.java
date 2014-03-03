@@ -4,23 +4,17 @@ import static java.lang.Math.acos;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-import java.util.StringTokenizer;
 
 import android.content.Context;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.Bundle;
 import android.text.format.DateFormat;
 
+import com.nag.android.util.PreferenceHelper;
 import com.nag.android.volumemanager.VolumeManager.STATUS;
 
-class LocationSettingManager{
+public class LocationSetting{
 	public interface OnLocationAddedListener{
 		void OnLocationAdded(Location location);
 	}
@@ -31,66 +25,20 @@ class LocationSettingManager{
 	private static final double MAX_LOCATION=32;
 	private static final String PREF_LOCATION="location_";
 
-	 static class LocationData{
-		public enum TYPE {typeDefault, typeProtected, typeEditable};
-		LocationData(String buf){
-			decode(buf);
-		}
-
-		LocationData(String title, double latitude, double longitude, STATUS status, TYPE type){
-			this.title=title;
-			this.latitude=latitude;
-			this.longitude=longitude;
-			this.status=status;
-			this.type=type;
-		}
-
-		public String toString(){
-			return title+"("+status.toString()+")";
-		}
-
-		public String encode(){
-			return title+","+String.valueOf(latitude)+","+String.valueOf(longitude)+","+status.toString()+","+type.toString();
-		}
-
-		public void decode(String buf){
-			StringTokenizer token=new StringTokenizer(buf,",");
-			title=token.nextToken();
-			latitude=Double.valueOf(token.nextToken());
-			longitude=Double.valueOf(token.nextToken());
-			status=STATUS.valueOf(token.nextToken());
-			type=TYPE.valueOf(token.nextToken());
-		}
-
-		public String getTitle(){return title;}
-		public double getLatitude(){return latitude;}
-		public double getLongitude(){return longitude;}
-		public STATUS getStatus(){return status;}
-		public TYPE getType(){return type;}
-
-		public void setTitle(String title){
-			this.title=title;
-		}
-		public void setStatus(STATUS status){
-			this.status=status;
-		}
-
-		private String title;
-		private double latitude;
-		private double longitude;
-		private STATUS status;
-		private TYPE type;
-	}
 
 	private final ArrayList<LocationData> locations=new ArrayList<LocationData>();
 	private final PreferenceHelper pref;
 	private final LocationData locationDefault;;
 	private boolean enable=true;
 
-	LocationSettingManager(Context context, PreferenceHelper pref){
+	protected LocationSetting(Context context, PreferenceHelper pref){
 		this.pref=pref;
 		this.locationDefault=new LocationData(context.getString(R.string.location_default), 0.0, 0.0, STATUS.uncontrol, LocationData.TYPE.typeDefault);
 		loadAll(context);
+	}
+
+	public boolean getEnable(){
+		return enable;
 	}
 
 	public void setEnable(boolean value){
@@ -184,7 +132,7 @@ class LocationSettingManager{
 	private LocationData getLocationData(Location location){
 		for(LocationData loc:locations){
 			if(loc.getType()!=LocationData.TYPE.typeDefault
-					&&isInArea(location.getLatitude(), location.getLongitude(), loc.latitude, loc.longitude, location.getAccuracy())){
+					&&isInArea(location.getLatitude(), location.getLongitude(), loc.getLatitude(), loc.getLongitude(), location.getAccuracy())){
 				return loc;
 			}
 		}

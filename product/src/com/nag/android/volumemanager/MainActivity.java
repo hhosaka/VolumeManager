@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import com.nag.android.volumemanager.VolumeManager.OnFinishPerformListener;
+import com.nag.android.util.PreferenceHelper;
 import com.nag.android.volumemanager.VolumeManager.STATUS;
 
 import android.media.AudioManager;
@@ -15,6 +15,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -25,6 +26,7 @@ import android.widget.ToggleButton;
 public class MainActivity extends Activity{
 
 	private Map<STATUS, String> status2label=new HashMap<STATUS, String>(){
+		private static final long serialVersionUID = 1L;
 		{
 			put(STATUS.enable, "Enable");
 			put(STATUS.manner, "Manner");
@@ -35,6 +37,7 @@ public class MainActivity extends Activity{
 
 	private Iterator<STATUS> iterator=status2label.keySet().iterator();
 	private VolumeManager vm;
+	private StatusChangedReciever reciever=null;
 
 	private STATUS getNextSTATUS(){
 		assert(iterator!=null);
@@ -46,28 +49,38 @@ public class MainActivity extends Activity{
 
 	class StatusChangedReciever extends BroadcastReceiver{
 		@Override
-		public void onReceive(Context context, Intent intent) {
-				String buf;
+		public void onReceive(Context context, Intent intent) {//TODO ÇÍÇµÅOÉoÅ[ÇÃÇ†Ç∆ÇµÇ‹Ç¬
 			if (intent.getAction().equals(AudioManager.RINGER_MODE_CHANGED_ACTION)) {
-				switch(intent.getIntExtra(AudioManager.EXTRA_RINGER_MODE, -1))
-				{
-				case AudioManager.RINGER_MODE_NORMAL:
-					buf="Auto(Enable)";
-					break;
-				case AudioManager.RINGER_MODE_VIBRATE:
-					buf="Auto(Manner)";
-					break;
-				case AudioManager.RINGER_MODE_SILENT:
-					buf="Auto(Silent)";
-					break;
-				default:
-					throw new RuntimeException();
+				String buf;
+				STATUS status=VolumeManager.convDeviceStatus(intent.getIntExtra(AudioManager.EXTRA_RINGER_MODE, -1));
+				vm.confirm(status);
+				setStatusTitle();
+				if(vm.isAuto()){
+					buf="Auto("+getStatusLabel(getApplicationContext(), status)+")";
+				}else{
+					buf=getStatusLabel(getApplicationContext(), status);
 				}
 				((Button)findViewById(R.id.buttonStatus)).setText(buf);
 			}
 		}
 	}
-	private StatusChangedReciever reciever=null;
+
+	private static String getStatusLabel(Context context, STATUS status){
+		switch(status){
+		case enable:
+			return context.getString(R.string.label_enable);
+		case manner:
+			return context.getString(R.string.label_manner);
+		case silent:
+			return context.getString(R.string.label_silent);
+		case uncontrol:
+			return context.getString(R.string.label_uncontrol);
+		case confirming:
+			return context.getString(R.string.label_delete);
+		default:
+			throw new RuntimeException();
+		}
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -79,27 +92,31 @@ public class MainActivity extends Activity{
 		initStatusButton();
 		initScheduleButtons();
 		initLocationButtons();
-		STATUS status=vm.perform(this);
-		setStatusTitle(status);
+		setStatusTitle();
+		vm.performByCurrentStatus(this);
 	}
 
-	private void setStatusTitle(STATUS status) {
-		if(status==STATUS.auto){
+	private void setStatusTitle() {
+		String buf;
+		if(vm.isAuto()){
 			IntentFilter filter = new IntentFilter();
 			filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
 			registerReceiver(reciever=new StatusChangedReciever(),filter);
-			((Button)findViewById(R.id.buttonStatus)).setText("Auto(Checking)");
+			buf="Auto"+"("+getStatusLabel(getApplicationContext(), vm.getSubStatus())+")";
 		}else{
 			if(reciever!=null){
 				unregisterReceiver(reciever);
 				reciever=null;
 			}
-			((Button)findViewById(R.id.buttonStatus)).setText(status.toString());
+			buf=getStatusLabel(getApplicationContext(), vm.getStatus());
 		}
+		((Button)findViewById(R.id.buttonStatus)).setText(buf);
 	}
 
 	private void initLocationButtons() {
-		((ToggleButton)findViewById(R.id.buttonByLocation)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
+		ToggleButton tb=((ToggleButton)findViewById(R.id.buttonByLocation));
+		tb.setChecked(vm.getEnableLocation());
+		tb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
 				vm.setEnableLocation(isChecked);
@@ -114,7 +131,9 @@ public class MainActivity extends Activity{
 	}
 
 	private void initScheduleButtons() {
-		((ToggleButton)findViewById(R.id.buttonBySchedule)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
+		ToggleButton tb=((ToggleButton)findViewById(R.id.buttonBySchedule));
+		tb.setChecked(vm.getEnableSchedule());
+		tb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
 				vm.setEnableSchedule(isChecked);
@@ -133,19 +152,32 @@ public class MainActivity extends Activity{
 		btnStatus.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v) {
-				setStatusButton(getNextSTATUS());
+				vm.perform(getApplicationContext(), getNextSTATUS());
+				setStatusTitle();
 			}
 		});
-	}
-
-	private void setStatusButton(STATUS status){
-		vm.perform(getApplicationContext(), status);
-		setStatusTitle(status);
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
+		return super.onCreateOptionsMenu(menu);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+		case R.id.action_help:
+			Intent intent=new Intent(this,WebViewActivity.class);
+			intent.putExtra(WebViewActivity.PARAM_MODE, WebViewActivity.MODE_HELP);
+			startActivity(intent);
+			return true;
+		case R.id.action_set_frequency:
+			return true;
+		case R.id.action_set_priority:
+			return true;
+		}
+		return false;
 	}
 }

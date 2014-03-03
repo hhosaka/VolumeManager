@@ -1,0 +1,393 @@
+﻿@charset "utf-8";
+
+
+
+/*----------------------------------------------------
+ default 
+----------------------------------------------------*/
+
+html,body,div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,abbr,address,cite,code,del,dfn,em,ins,kbd,q,samp,small,strong,sub,sup,var,b,i,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,figcaption,figure,footer,header,hgroup,menu,nav,section,summary,time,mark,audio,video
+{
+	margin:0;
+	padding:0;
+	border:0;
+	outline:0;
+	background:transparent;
+}
+
+img
+{
+	margin:10;
+	padding:0;
+	border:0;
+	outline:0;
+	font-size:100%;
+}
+
+body
+{
+	line-height:1;
+}
+
+article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section
+{
+	display:block;
+}
+
+nav ul
+{
+	list-style:none;
+}
+
+blockquote,q
+{
+	quotes:none;
+}
+
+blockquote:before,blockquote:after,q:before,q:after
+{
+	content:'';
+	content:none;
+}
+
+a
+{
+	margin:0;
+	padding:0;
+	font-size:100%;
+	vertical-align:baseline;
+	background:transparent;
+}
+
+ins
+{
+	background-color:#ff9;
+	color:#000;
+	text-decoration:none;
+}
+
+mark
+{
+	background-color:#ff9;
+	color:#000;
+	font-style:italic;font-weight:bold;
+}
+
+del
+{
+	text-decoration:line-through;
+}
+
+abbr[title],dfn[title]
+{
+	border-bottom:1px dotted;cursor:help;
+}
+
+table
+{
+	border-collapse:
+}
+
+th
+{
+	border: solid 1px;
+	padding: 0.5em;
+}
+
+td
+{
+	border: solid 1px;
+	padding: 0.5em;
+}
+
+td.image
+{
+	border: solid 0px;
+	padding: 0em;
+}
+
+hr
+{
+	display:block;
+	height:1px;
+	border:0;
+	border-top:1px solid #ccc;
+	margin:1em 0;
+	padding:0;
+}
+
+input,select
+{
+	vertical-align:middle;
+}
+
+/*----------------------------------------------------
+ elements
+----------------------------------------------------*/
+
+body {
+
+	background: #ccc;
+
+	color: #333;
+
+	font-family: font-family: Verdana, Roboto, 'Droid Sans', sans-serif;
+	font-size: 100%;
+
+	line-height: 1.5;
+
+	-webkit-text-size-adjust: none; /* フォントサイズ自動調整 */
+
+}
+
+
+a
+{
+
+	-webkit-tap-highlight-color: rgba(200,200,555,.6);
+
+}
+
+
+
+a:link
+{
+
+	text-decoration: none;
+
+}
+
+
+
+a:visited
+{
+
+	text-decoration: none;
+
+}
+
+
+
+img
+{
+
+	vertical-align: top;
+
+	margin: 20px;
+}
+
+
+
+img:not([width])
+{
+
+	zoom: .5;
+}
+
+
+
+p, dl, ol, ul
+{
+
+	margin-bottom: 10px;
+
+}
+
+
+
+ol, ul
+{
+
+	margin-left: 25px;
+
+}
+
+
+
+
+/*----------------------------------------------------
+ #page
+----------------------------------------------------*/
+
+#page
+{
+
+	overflow: hidden;
+
+	width: 320px;
+
+	margin: 0 auto;
+	background: #fff;
+
+}
+
+
+
+/*----------------------------------------------------
+ ランドスケープ表示
+----------------------------------------------------*/
+
+@media all and (orientation:landscape)
+{
+
+	#page
+	{
+
+		width: 480px;
+
+	}
+
+}
+
+
+
+
+/*----------------------------------------------------
+ header
+----------------------------------------------------*/
+
+
+header.global
+{
+
+	padding: 10px 0;
+
+	text-align: center;
+
+	background: #DCDCDC;
+
+	color: #000;
+
+}
+
+
+
+header.global h1
+{
+
+	padding: 0 20px 10px;
+
+}
+
+
+header.global img
+{
+
+	margin: 0;
+
+}
+
+
+
+header.global nav
+{
+
+	margin: 0;
+
+}
+
+
+
+header.global nav ul
+{
+
+	margin: 0;
+
+	padding: 0;
+
+}
+
+
+
+header.global nav ul li
+{
+
+	-moz-box-sizing: border-box;
+
+	-webkit-box-sizing: border-box;
+
+	box-sizing: border-box;
+
+	float: left;
+
+	width: 20%;
+
+	margin: 0;
+
+	text-align: center;
+
+	background: #eee;
+
+	border-right: 1px solid #fff;
+
+}
+
+
+
+header.global nav ul li:last-child 
+{
+
+	border-right: 0;
+
+}
+
+
+header.global nav ul li a {
+	
+	display: block;
+
+	padding: 5px;
+
+}
+
+
+
+
+/*----------------------------------------------------
+ footer
+----------------------------------------------------*/
+
+footer.global
+{
+
+	padding: 10px 0 50px;
+
+	background: #333;
+
+	color: #fff;
+
+}
+
+
+footer.global p.copyright
+{
+
+	margin: 0;
+
+	text-align: center;
+
+}
+
+
+
+
+/*----------------------------------------------------
+ main
+----------------------------------------------------*/
+section.main {
+	padding: 0 10px 10px;
+}
+
+
+/*----------------------------------------------------
+ clearfix
+----------------------------------------------------*/
+
+header.global nav ul:after
+{
+	content: '';
+	display: block;
+	clear: both;
+}
+
+

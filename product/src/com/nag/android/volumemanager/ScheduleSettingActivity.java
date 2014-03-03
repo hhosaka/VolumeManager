@@ -1,8 +1,7 @@
 package com.nag.android.volumemanager;
 
-import java.util.ArrayList;
-
-import com.nag.android.volumemanager.StatusSelector.OnStatusSelectedListener;
+import com.nag.android.util.PreferenceHelper;
+import com.nag.android.util.SimpleSelector.OnStatusSelectedListener;
 import com.nag.android.volumemanager.VolumeManager.STATUS;
 
 import android.os.Bundle;
@@ -11,36 +10,36 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class ScheduleSettingActivity extends Activity implements AdapterView.OnItemClickListener{
+public class ScheduleSettingActivity extends Activity{
 
-	private ScheduleSettingManager ssm=null;
-	private ArrayAdapter<STATUS> adapter;
+	private ScheduleSetting ssm=null;
+	private InternalAdapter adapter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_schedule_setting);
 
-		ssm=new ScheduleSettingManager(this, new PreferenceHelper(this));
+		ssm=new ScheduleSetting(this, new PreferenceHelper(this));
 		initListView();
 	}
 
 	private void initListView(){
-		adapter=new InternalAdapter(this, ssm.getList());
+		adapter=new InternalAdapter(this,0);// TODO : day is not supported yet
 		ListView lv =((ListView)findViewById(R.id.listViewLocation));
 		lv.setAdapter(adapter);
-		lv.setOnItemClickListener(this);
 		findViewById(R.id.buttonDone).setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v){
-				ssm.saveAll();
+				ssm.save(0);// TODO: day does not support yet
 				finish();
 			}
 			
@@ -54,37 +53,13 @@ public class ScheduleSettingActivity extends Activity implements AdapterView.OnI
 		});
 	}
 
-	@Override
-	public void onItemClick(AdapterView<?> parent, View view, final int position, long id){
-//		if(ssm.getLocationData().get(position).getType()==LocationData.TYPE.typeEditable){
-//			String[] items = {"Edit","Delete"};
-//			new AlertDialog.Builder(ScheduleSettingActivity.this)
-//				.setTitle("Select Action")
-//				.setItems( items, new DialogInterface.OnClickListener() {
-//					public void onClick(DialogInterface dialog, int which){
-//						switch(which){
-//						case 0:
-//							edit(position);
-//							break;
-//						case 1:
-//							lsm.remove(getApplicationContext(), position);
-//							adapter.notifyDataSetChanged();
-//							break;
-//						}
-//					}
-//				})
-//				.create().show();
-//		}
-	}
-
-	class InternalAdapter extends ArrayAdapter<STATUS> implements OnStatusSelectedListener{
+	class InternalAdapter extends BaseAdapter implements OnStatusSelectedListener{
 		private final LayoutInflater inflater;
-		private ArrayList<STATUS> schedules;
+		private final int day;
 
-		public InternalAdapter(Context context, ArrayList<STATUS>schedules) {
-			super(context, R.layout.layout_schedule_list_item, schedules);
-			this.schedules=schedules;
+		public InternalAdapter(Context context, int day) {
 			this.inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			this.day=day;
 		}
 
 		@Override
@@ -92,22 +67,38 @@ public class ScheduleSettingActivity extends Activity implements AdapterView.OnI
 			if (convertView == null) {
 				convertView = inflater.inflate(R.layout.layout_schedule_list_item, null);
 			}
-			((TextView)convertView.findViewById(R.id.textHour)).setText(position+"Žž");
+			((TextView)convertView.findViewById(R.id.textHour)).setText(position+getString(R.string.label_time_postfix));
 			StatusSelector s=((StatusSelector)convertView.findViewById(R.id.buttonStatus));
-			s.add("Enable",STATUS.enable);
-			s.add("Manner",STATUS.manner);
-			s.add("Silent",STATUS.silent);
-			s.add("Uncontrol",STATUS.uncontrol);
-			s.add("follow",STATUS.follow);
-			s.setStatus(getItem(position));
+			s.add(getString(R.string.label_enable), STATUS.enable);
+			s.add(getString(R.string.label_manner), STATUS.manner);
+			s.add(getString(R.string.label_silent), STATUS.silent);
+			s.add(getString(R.string.label_uncontrol), STATUS.uncontrol);
+			s.add(getString(R.string.label_Follow), STATUS.follow);
+			s.setStatus((STATUS)getItem(position));
 			s.setIndex(position);
 			s.setOnStatusSelectedListener(this);
 			return convertView;
 		}
 
 		@Override
-		public void OnSelected(int index, STATUS status) {
-			schedules.set(index,status);
+		public void OnSelected(int index, Object status) {
+			ssm.setStatus(day, index, (STATUS)status);
+		}
+
+		@Override
+		public int getCount() {
+			return ScheduleSetting.HOUR_OF_A_DAY;
+		}
+
+		@Override
+		public Object getItem(int position) {
+			return ssm.getStatus(day,position);
+		}
+
+		@Override
+		public long getItemId(int position) {
+			// TODO Auto-generated method stub
+			return 0;
 		}
 	}
 	@Override

@@ -34,10 +34,12 @@
             android:label="@string/title_activity_location_setting" >
         </activity>
         <activity
-            android:name="com.nag.android.volumemanager.EditLocationSettingsActivity"
-            android:label="@string/title_activity_edit_location_settings" >
+            android:name="com.nag.android.volumemanager.EditLocationSettingsActivity">
         </activity>
-        <receiver android:name=".AutoReciever" android:process=":remote" />
+        <activity
+            android:name="com.nag.android.volumemanager.WebViewActivity">
+        </activity>
+        <receiver android:name=".StartCheckingReciever"/>
         </application>
 
 </manifest>

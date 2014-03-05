@@ -30,7 +30,7 @@ public class LocationSettingActivity extends Activity implements OnLocationColle
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_location_setting);
 
-		locationsetting=VolumeManager.getInstance(this).getLocationSettingManager();
+		locationsetting=VolumeManager.getInstance(this).getLocationSetting();
 		initAddButton();
 		initListView();
 	}

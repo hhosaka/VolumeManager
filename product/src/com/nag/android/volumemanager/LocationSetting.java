@@ -31,7 +31,7 @@ public class LocationSetting{
 	private final LocationData locationDefault;;
 	private boolean enable=true;
 
-	protected LocationSetting(Context context, PreferenceHelper pref){
+	public LocationSetting(Context context, PreferenceHelper pref){
 		this.pref=pref;
 		this.locationDefault=new LocationData(context.getString(R.string.location_default), 0.0, 0.0, STATUS.uncontrol, LocationData.TYPE.typeDefault);
 		loadAll(context);

@@ -17,6 +17,6 @@ public class StartCheckingReciever extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		VolumeManager.getInstance(context).doAuto(context);
+		VolumeManager.getInstance(context).doAuto(context, null);
 	}
 }

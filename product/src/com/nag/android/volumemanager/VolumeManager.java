@@ -1,11 +1,26 @@
 package com.nag.android.volumemanager;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.Calendar;
+
 import com.nag.android.util.PreferenceHelper;
 import com.nag.android.volumemanager.LocationHelper.OnLocationCollectedListener;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap.CompressFormat;
 import android.location.Location;
 import android.media.AudioManager;
+import android.net.Uri;
+import android.text.format.DateFormat;
+import android.util.Log;
 
 public class VolumeManager implements OnLocationCollectedListener{
 	private final String PREF_VOLUME_MANAGER = "pref_volume_manager_";
@@ -35,7 +50,8 @@ public class VolumeManager implements OnLocationCollectedListener{
 	private STATUS sub_status=null;
 	private double fineness=1.0;
 	private boolean resetauto;
-
+	private OnFinishPerformListener listener=null;
+	
 	public static VolumeManager getInstance(Context context){
 		if(instance==null){
 			instance=new VolumeManager(context, PreferenceHelper.getInstance(context));
@@ -55,7 +71,8 @@ public class VolumeManager implements OnLocationCollectedListener{
 		status=STATUS.valueOf(pref.getString(PREF_VOLUME_MANAGER+PREF_STATUS,STATUS.uncontrol.toString()));
 		locationsetting.setEnable(pref.getBoolean(PREF_VOLUME_MANAGER+PREF_ENABLE_LOCATION, true));
 		schedulesetting.setEnable(pref.getBoolean(PREF_VOLUME_MANAGER+PREF_ENABLE_SCHEDULE, true));
-		this.frequency=pref.getInt(PREF_VOLUME_MANAGER+PREF_FREQUENCY, 1);
+//		this.frequency=pref.getInt(PREF_VOLUME_MANAGER+PREF_FREQUENCY, 1);
+		this.frequency=pref.getInt(PREF_VOLUME_MANAGER+PREF_FREQUENCY, 60);// TODO test
 		this.priority=PRIORITY.valueOf(pref.getString(PREF_VOLUME_MANAGER+PREF_PRIORITY, PRIORITY.silentfirst.toString()));
 		this.fineness=pref.getDouble(PREF_VOLUME_MANAGER+PREF_FINENESS, 1.0);
 	}
@@ -77,7 +94,9 @@ public class VolumeManager implements OnLocationCollectedListener{
 
 	public void setPriority(Context context, PRIORITY priority){
 		this.priority=priority;
-		doAuto(context);
+		if(isAuto()){
+			doAuto(context, null);
+		}
 	}
 
 	public boolean getEnableLocation(){
@@ -96,11 +115,11 @@ public class VolumeManager implements OnLocationCollectedListener{
 		schedulesetting.setEnable(value);
 	}
 
-	public LocationSetting getLocationSettingManager(){
+	public LocationSetting getLocationSetting(){
 		return locationsetting;
 	}
 
-	public ScheduleSetting getScheduleSettingManager(){
+	public ScheduleSetting getScheduleSetting(){
 		return schedulesetting;
 	}
 
@@ -140,7 +159,7 @@ public class VolumeManager implements OnLocationCollectedListener{
  * @param status it comes from device. for fail safe, it may gives up auto when status changes by outside,
  * @return true if VolumeManager gives up auto
  */
-	public boolean confirm(STATUS status){
+	public boolean confirmStatusChangeFromOutside(STATUS status){
 		if(resetauto && this.status==STATUS.auto && status!=sub_status){
 			this.status=status;
 			return true;
@@ -161,13 +180,12 @@ public class VolumeManager implements OnLocationCollectedListener{
 		}
 	}
 
-	public void doAuto(Context context){
-		if(isAuto()){
-			if(locationsetting.getEnable()){
-				new LocationHelper(context).start(false, fineness, this);
-			}else{
-				setStatusToDevice(sub_status=calcStatus(STATUS.uncontrol, schedulesetting.getStatus()));
-			}
+	public void doAuto(Context context, OnFinishPerformListener listener){
+		if(locationsetting.getEnable()){
+			this.listener=listener;
+			new LocationHelper(context).start(false, fineness, this);
+		}else{
+			setStatusToDevice(context, sub_status=pickStatus(STATUS.uncontrol, schedulesetting.getStatus()));
 		}
 	}
 
@@ -183,11 +201,31 @@ public class VolumeManager implements OnLocationCollectedListener{
 			StartCheckingReciever.Start(context, getRepeatTime());
 			sub_status=STATUS.confirming;
 		}else{
-			setStatusToDevice(status);
+			setStatusToDevice(context, status);
 		}
 	}
 
-	private void setStatusToDevice(STATUS status){
+	private int number=0;
+	private void sendNotification(Context context, STATUS status) {// TODO just for testing
+		if(context!=null)
+		{
+			NotificationManager manager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+			Notification n = new Notification();
+			Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:1234567890"));
+			PendingIntent pi = PendingIntent.getActivity(context, 0, intent, 0);
+			
+			n.icon = R.drawable.ic_launcher;
+			n.tickerText = "status changed to"+status;
+			n.number = number;
+			n.setLatestEventInfo(context, context.getString(R.string.app_name), "("+DateFormat.format("kk:mm:ss", Calendar.getInstance()).toString()+") status changed to "+ status, pi);
+			
+			manager.notify(number++, n);
+		}
+	}
+
+	private void setStatusToDevice(Context context, STATUS status){
+		sendNotification(context, status);
+		Log.d("HDEBUG","setStatusToDevice="+status);
 		switch(status){
 		case enable:
 			audiomanager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
@@ -209,7 +247,8 @@ public class VolumeManager implements OnLocationCollectedListener{
 	@Override
 	public void onFinishLocationCollection(Location location, RESULT result) {
 		if(result==RESULT.resultOK){
-			setStatusToDevice(sub_status=calcStatus(locationsetting.getStatus(location), schedulesetting.getStatus()));
+			setStatusToDevice(null, sub_status=pickStatus(locationsetting.getStatus(location), schedulesetting.getStatus()));
+			if(listener!=null){listener.onFinishPerform(sub_status);}
 		}
 	}
 
@@ -217,70 +256,76 @@ public class VolumeManager implements OnLocationCollectedListener{
 		return 1000*60*60/frequency;
 	}
 
-	private STATUS getMoreSilentStatus(STATUS st1, STATUS st2){
+	private STATUS pickMoreSilentStatus(STATUS st1, STATUS st2){
+		assert(st1!=STATUS.uncontrol);
+		assert(st2!=STATUS.uncontrol);
 		switch(st1){
 		case silent:
 			return st1;
-		case enable:
-			if(st2==STATUS.uncontrol){
-				return st1;
-			}else{
-				return st2;
-			}
 		case manner:
 			if(st2==STATUS.silent){
 				return st2;
 			}else{
 				return st1;
 			}
-		case uncontrol:
+		case enable:
 			return st2;
 		default:
 			throw new RuntimeException();
 		}
 	}
 
-	private STATUS getModeRingStatus(STATUS st1, STATUS st2){
+	private STATUS pickModeRingStatus(STATUS st1, STATUS st2){
+		assert(st1!=STATUS.uncontrol);
+		assert(st2!=STATUS.uncontrol);
 		switch(st1){
 		case silent:
+			return st2;
 		case manner:
-			if(st2==STATUS.uncontrol){
+			if(st2==STATUS.silent){
 				return st1;
 			}else{
 				return st2;
 			}
 		case enable:
 			return st1;
-		case uncontrol:
-			return st2;
 		default:
 			throw new RuntimeException();
 		}
 	}
 
-	private STATUS calcStatus(STATUS statusLocation, STATUS statusSchedule){
-		STATUS status=null;
-		switch(priority){
-		case schedulefirst:
-			status=statusSchedule;
-			if(status!=STATUS.uncontrol){
-				return status;
-			}else{
-				return statusLocation;
-			}
-		case locationfirst:
-			status=statusLocation;
-			if(status!=STATUS.uncontrol){
-				return status;
-			}else{
+	private STATUS pickStatus(STATUS statusLocation, STATUS statusSchedule){
+		assert(statusLocation==STATUS.enable||statusLocation==STATUS.manner||statusLocation==STATUS.silent||statusLocation==STATUS.uncontrol);
+		assert(statusSchedule==STATUS.enable||statusSchedule==STATUS.manner||statusSchedule==STATUS.silent||statusSchedule==STATUS.uncontrol);
+		if(statusLocation==STATUS.uncontrol){
+			return statusSchedule;
+		}else if(status==STATUS.uncontrol){
+			return statusLocation;
+		}else{
+			switch(priority){
+			case schedulefirst:
 				return statusSchedule;
+			case locationfirst:
+				return statusLocation;
+			case silentfirst:
+				return pickMoreSilentStatus(statusLocation, statusSchedule);
+			case ringfirst:
+				return pickModeRingStatus(statusLocation, statusSchedule);
+			default:
+				throw new RuntimeException();
 			}
-		case silentfirst:
-			return getMoreSilentStatus(statusLocation, statusSchedule);
-		case ringfirst:
-			return getModeRingStatus(statusLocation, statusSchedule);
-		default:
-			throw new RuntimeException();
 		}
 	}
+	
+//	void log(STATUS status)
+//	{
+//		PrintStream out;
+//		try {
+//			out = new PrintStream(new FileOutputStream("log.txt", true));
+//			out.println(DateFormat.format("kk:mm:ss", Calendar.getInstance()).toString()+","+status);
+//			out.close();
+//		} catch (FileNotFoundException e) {
+//			e.printStackTrace();
+//		}
+//	}
 }

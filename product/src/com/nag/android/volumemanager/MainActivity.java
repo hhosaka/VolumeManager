@@ -53,7 +53,7 @@ public class MainActivity extends Activity{
 			if (intent.getAction().equals(AudioManager.RINGER_MODE_CHANGED_ACTION)) {
 				String buf;
 				STATUS status=VolumeManager.convDeviceStatus(intent.getIntExtra(AudioManager.EXTRA_RINGER_MODE, -1));
-				vm.confirm(status);
+				vm.confirmStatusChangeFromOutside(status);
 				setStatusTitle();
 				if(vm.isAuto()){
 					buf="Auto("+getStatusLabel(getApplicationContext(), status)+")";

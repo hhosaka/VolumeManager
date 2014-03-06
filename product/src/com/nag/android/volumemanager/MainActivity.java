@@ -93,7 +93,7 @@ public class MainActivity extends Activity{
 		initScheduleButtons();
 		initLocationButtons();
 		setStatusTitle();
-		vm.performByCurrentStatus(this);
+		vm.setStatus(this);
 	}
 
 	private void setStatusTitle() {
@@ -152,7 +152,7 @@ public class MainActivity extends Activity{
 		btnStatus.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v) {
-				vm.perform(getApplicationContext(), getNextSTATUS());
+				vm.setStatus(getApplicationContext(), getNextSTATUS(), null);
 				setStatusTitle();
 			}
 		});

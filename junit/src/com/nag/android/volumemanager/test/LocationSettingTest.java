@@ -17,6 +17,13 @@ import junit.framework.TestCase;
 
 public class LocationSettingTest extends InstrumentationTestCase {
 
+	private static final double lat1=35.562066;// Home
+	private static final double lng1=139.442946;
+	private static final double lat2=35.562299;// nebor
+	private static final double lng2=139.442901;
+	private static final double lat3=35.562566;// far
+	private static final double lng3=139.450392;
+	
 	LocationSetting instance;
 
 	private Context getApplicationContext() {
@@ -40,7 +47,7 @@ public class LocationSettingTest extends InstrumentationTestCase {
 	}
 
 	void testDistance(){
-		assertTrue(invokeDistance(0.0, 0.0, 0.0, 0.0)<100.0);
-		assertTrue(invokeDistance(0.0, 0.0, 0.0, 0.0)>100.0);
+		assertTrue(invokeDistance(lat1, lng1, lat2, lng2)<100.0);
+		assertTrue(invokeDistance(lat1, lng1, lat3, lng3)>100.0);
 	}
 }

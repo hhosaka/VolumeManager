@@ -180,28 +180,32 @@ public class VolumeManager implements OnLocationCollectedListener{
 		}
 	}
 
-	public void doAuto(Context context, OnFinishPerformListener listener){
+	private void doAuto(Context context, OnFinishPerformListener listener){
+		assert(status==STATUS.auto);
 		if(locationsetting.getEnable()){
 			this.listener=listener;
 			new LocationHelper(context).start(false, fineness, this);
 		}else{
 			setStatusToDevice(context, sub_status=pickStatus(STATUS.uncontrol, schedulesetting.getStatus()));
+			listener.onFinishPerform(sub_status);
 		}
 	}
 
-	public STATUS performByCurrentStatus(Context context){
-		perform(context,status);
+	public STATUS setStatus(Context context){
+		setStatus(context, status, null);
 		return status;
 	}
 
-	public void perform(Context context, STATUS status){
+	public void setStatus(Context context, STATUS status, OnFinishPerformListener listener){
 		this.status=status;
 		pref.putString(PREF_STATUS, status.toString());
 		if(status==STATUS.auto){
-			StartCheckingReciever.Start(context, getRepeatTime());
 			sub_status=STATUS.confirming;
+			this.listener=listener;
+			StartCheckingReciever.Start(context, getRepeatTime());
 		}else{
 			setStatusToDevice(context, status);
+			if(listener!=null){listener.onFinishPerform(status);}
 		}
 	}
 
@@ -299,7 +303,7 @@ public class VolumeManager implements OnLocationCollectedListener{
 		assert(statusSchedule==STATUS.enable||statusSchedule==STATUS.manner||statusSchedule==STATUS.silent||statusSchedule==STATUS.uncontrol);
 		if(statusLocation==STATUS.uncontrol){
 			return statusSchedule;
-		}else if(status==STATUS.uncontrol){
+		}else if(statusSchedule==STATUS.uncontrol){
 			return statusLocation;
 		}else{
 			switch(priority){

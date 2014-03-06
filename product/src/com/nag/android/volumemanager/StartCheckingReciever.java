@@ -1,5 +1,8 @@
 package com.nag.android.volumemanager;
 
+import com.nag.android.volumemanager.VolumeManager.OnFinishPerformListener;
+import com.nag.android.volumemanager.VolumeManager.STATUS;
+
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -17,6 +20,6 @@ public class StartCheckingReciever extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		VolumeManager.getInstance(context).doAuto(context, null);
+		VolumeManager.getInstance(context).setStatus(context);
 	}
 }

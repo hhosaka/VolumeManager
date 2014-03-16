@@ -1,9 +1,10 @@
-package com.nag.android.volumemanager;
+package com.nag.android.ringmanager;
 
 import java.util.Calendar;
 
-import com.nag.android.volumemanager.LocationHelper.OnLocationCollectedListener;
-import com.nag.android.volumemanager.VolumeManager.STATUS;
+import com.nag.android.ringmanager.LocationHelper.OnLocationCollectedListener;
+import com.nag.android.ringmanager.RingManager.STATUS;
+import com.nag.android.volumemanager.R;
 
 import android.location.Location;
 import android.os.Bundle;
@@ -33,7 +34,7 @@ public class LocationSettingActivity extends Activity implements OnLocationColle
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_location_setting);
 
-		locationsetting=VolumeManager.getInstance(this).getLocationSetting();
+		locationsetting=RingManager.getInstance(this).getLocationSetting();
 		initAddButton();
 		initListView();
 	}

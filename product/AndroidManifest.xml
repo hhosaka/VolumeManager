@@ -18,7 +18,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.nag.android.volumemanager.MainActivity"
+            android:name="com.nag.android.ringmanager.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,20 +26,20 @@
                 </intent-filter>
         </activity>
         <activity
-            android:name="com.nag.android.volumemanager.LocationSettingActivity"
+            android:name="com.nag.android.ringmanager.LocationSettingActivity"
             android:label="@string/title_activity_location_setting" >
         </activity>
         <activity
-            android:name="com.nag.android.volumemanager.ScheduleSettingActivity"
+            android:name="com.nag.android.ringmanager.ScheduleSettingActivity"
             android:label="@string/title_activity_location_setting" >
         </activity>
         <activity
-            android:name="com.nag.android.volumemanager.EditLocationSettingsActivity">
+            android:name="com.nag.android.ringmanager.EditLocationSettingsActivity">
         </activity>
         <activity
-            android:name="com.nag.android.volumemanager.WebViewActivity">
+            android:name="com.nag.android.ringmanager.WebViewActivity">
         </activity>
-        <receiver android:name=".StatusRefreshReciever"/>
+        <receiver android:name="com.nag.android.ringmanager.StatusRefreshReciever"/>
         </application>
 
 </manifest>

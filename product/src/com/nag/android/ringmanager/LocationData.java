@@ -1,8 +1,8 @@
-package com.nag.android.volumemanager;
+package com.nag.android.ringmanager;
 
 import java.util.StringTokenizer;
 
-import com.nag.android.volumemanager.VolumeManager.STATUS;
+import com.nag.android.ringmanager.RingManager.STATUS;
 
 public class LocationData{
 	public enum TYPE {typeDefault, typeProtected, typeEditable};

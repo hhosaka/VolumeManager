@@ -1,4 +1,6 @@
-package com.nag.android.volumemanager;
+package com.nag.android.ringmanager;
+
+import com.nag.android.volumemanager.R;
 
 import android.os.Bundle;
 import android.app.Activity;

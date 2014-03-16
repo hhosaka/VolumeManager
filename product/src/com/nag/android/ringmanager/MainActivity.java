@@ -1,7 +1,8 @@
-package com.nag.android.volumemanager;
+package com.nag.android.ringmanager;
 
+import com.nag.android.ringmanager.RingManager.STATUS;
 import com.nag.android.util.RotationButton.OnValueChangedListener;
-import com.nag.android.volumemanager.VolumeManager.STATUS;
+import com.nag.android.volumemanager.R;
 import com.nag.android.volumemanager.controls.StatusRotationButton;
 
 import android.media.AudioManager;
@@ -21,7 +22,7 @@ import android.widget.ToggleButton;
 
 public class MainActivity extends Activity{
 
-	private VolumeManager vm;
+	private RingManager vm;
 	private StatusChangedReciever reciever=null;
 	private StatusRotationButton btnStatus=null; 
 	
@@ -29,7 +30,7 @@ public class MainActivity extends Activity{
 		@Override
 		public void onReceive(Context context, Intent intent) {//TODO ÇÍÇµÅOÉoÅ[ÇÃÇ†Ç∆ÇµÇ‹Ç¬
 			if (intent.getAction().equals(AudioManager.RINGER_MODE_CHANGED_ACTION)) {
-				STATUS status=VolumeManager.convParam2Status(intent.getIntExtra(AudioManager.EXTRA_RINGER_MODE, -1));
+				STATUS status=RingManager.convParam2Status(intent.getIntExtra(AudioManager.EXTRA_RINGER_MODE, -1));
 				vm.confirmStatusChangeFromOutside(status);
 				btnStatus.setStatus(vm.isAuto(), vm.getStatus());
 			}
@@ -42,7 +43,7 @@ public class MainActivity extends Activity{
 		setContentView(R.layout.activity_main);
 
 //		PreferenceHelper pref=new PreferenceHelper(this);
-		vm=VolumeManager.getInstance(this);
+		vm=RingManager.getInstance(this);
 		initStatusButton();
 		initScheduleButtons();
 		initLocationButtons();

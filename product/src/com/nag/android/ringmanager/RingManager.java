@@ -1,7 +1,8 @@
-package com.nag.android.volumemanager;
+package com.nag.android.ringmanager;
 
+import com.nag.android.ringmanager.LocationHelper.OnLocationCollectedListener;
 import com.nag.android.util.PreferenceHelper;
-import com.nag.android.volumemanager.LocationHelper.OnLocationCollectedListener;
+import com.nag.android.volumemanager.R;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -11,7 +12,7 @@ import android.content.Intent;
 import android.location.Location;
 import android.media.AudioManager;
 
-public class VolumeManager implements OnLocationCollectedListener{
+public class RingManager implements OnLocationCollectedListener{
 	private final String PREF_VOLUME_MANAGER = "pref_volume_manager_";
 	private final String PREF_AUTO = "auto";
 //	private final String PREF_STATUS = "status";
@@ -21,7 +22,7 @@ public class VolumeManager implements OnLocationCollectedListener{
 
 	private final PreferenceHelper pref;
 	private final AudioManager audiomanager;
-	private static VolumeManager instance;
+	private static RingManager instance;
 
 	public enum STATUS {uncontrol, enable, manner, silent, auto, follow,na};
 	public enum PRIORITY {schedulefirst, locationfirst, silentfirst, ringfirst};
@@ -43,15 +44,15 @@ public class VolumeManager implements OnLocationCollectedListener{
 		return this.status=status;
 	}
 
-	public static VolumeManager getInstance(Context context){
+	public static RingManager getInstance(Context context){
 		if(instance==null){
-			instance=new VolumeManager(context, PreferenceHelper.getInstance(context));
+			instance=new RingManager(context, PreferenceHelper.getInstance(context));
 		}
 		return instance;
 	}
 
 	//for debug
-	public VolumeManager(PreferenceHelper pref, AudioManager audiomanager, LocationSetting locationsetting, ScheduleSetting schedulesetting){
+	public RingManager(PreferenceHelper pref, AudioManager audiomanager, LocationSetting locationsetting, ScheduleSetting schedulesetting){
 		this.pref=pref;
 		this.audiomanager=audiomanager;
 		this.locationsetting=locationsetting;
@@ -75,7 +76,7 @@ public class VolumeManager implements OnLocationCollectedListener{
 		pref.putDouble(PREF_VOLUME_MANAGER+PREF_FINENESS, fineness);
 	}
 
-	private VolumeManager(Context context, PreferenceHelper pref){
+	private RingManager(Context context, PreferenceHelper pref){
 		this(pref
 				,(AudioManager)context.getSystemService(Context.AUDIO_SERVICE)
 				, new LocationSetting(context, pref)

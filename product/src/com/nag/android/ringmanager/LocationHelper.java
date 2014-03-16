@@ -1,6 +1,6 @@
-package com.nag.android.volumemanager;
+package com.nag.android.ringmanager;
 
-import com.nag.android.volumemanager.LocationHelper.OnLocationCollectedListener.RESULT;
+import com.nag.android.ringmanager.LocationHelper.OnLocationCollectedListener.RESULT;
 
 import android.content.Context;
 import android.location.Location;

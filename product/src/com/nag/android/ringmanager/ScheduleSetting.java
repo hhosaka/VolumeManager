@@ -1,11 +1,11 @@
-package com.nag.android.volumemanager;
+package com.nag.android.ringmanager;
 
 import java.util.Calendar;
 
 import android.content.Context;
 
+import com.nag.android.ringmanager.RingManager.STATUS;
 import com.nag.android.util.PreferenceHelper;
-import com.nag.android.volumemanager.VolumeManager.STATUS;
 
 public class ScheduleSetting {
 	static final int HOUR_OF_A_DAY=24;

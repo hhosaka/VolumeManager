@@ -1,6 +1,7 @@
-package com.nag.android.volumemanager;
+package com.nag.android.ringmanager;
 
-import com.nag.android.volumemanager.VolumeManager.STATUS;
+import com.nag.android.ringmanager.RingManager.STATUS;
+import com.nag.android.volumemanager.R;
 import com.nag.android.volumemanager.controls.StatusLabel;
 import com.nag.android.volumemanager.controls.StatusSelector;
 

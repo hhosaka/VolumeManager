@@ -1,4 +1,4 @@
-package com.nag.android.volumemanager;
+package com.nag.android.ringmanager;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -24,9 +24,9 @@ public class StatusRefreshReciever extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		if(VolumeManager.getInstance(context).isAuto())
+		if(RingManager.getInstance(context).isAuto())
 		{
-			VolumeManager.getInstance(context).doAuto(context);
+			RingManager.getInstance(context).doAuto(context);
 		}
 	}
 }

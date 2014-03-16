@@ -1,11 +1,11 @@
-package com.nag.android.volumemanager.mock;
+package com.nag.android.ringmanager.mock;
 
 import android.content.Context;
 import android.location.Location;
 
-import com.nag.android.volumemanager.LocationHelper;
-import com.nag.android.volumemanager.LocationHelper.OnLocationCollectedListener.RESULT;
-import com.nag.android.volumemanager.VolumeManager.STATUS;
+import com.nag.android.ringmanager.LocationHelper;
+import com.nag.android.ringmanager.LocationHelper.OnLocationCollectedListener.RESULT;
+import com.nag.android.ringmanager.RingManager.STATUS;
 
 public class MockLocationHelper extends LocationHelper {
 

@@ -3,8 +3,8 @@ package com.nag.android.volumemanager.controls;
 import android.content.Context;
 import android.util.AttributeSet;
 
+import com.nag.android.ringmanager.RingManager.STATUS;
 import com.nag.android.util.RotationButton;
-import com.nag.android.volumemanager.VolumeManager.STATUS;
 /**
  * 
  * @author H

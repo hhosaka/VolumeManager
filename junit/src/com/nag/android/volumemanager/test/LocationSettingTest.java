@@ -9,11 +9,11 @@ import android.test.InstrumentationTestCase;
 import android.util.Log;
 
 import com.nag.android.mock.MockLocation;
+import com.nag.android.ringmanager.LocationData;
+import com.nag.android.ringmanager.LocationSetting;
+import com.nag.android.ringmanager.RingManager;
+import com.nag.android.ringmanager.RingManager.STATUS;
 import com.nag.android.util.PreferenceHelper;
-import com.nag.android.volumemanager.LocationData;
-import com.nag.android.volumemanager.LocationSetting;
-import com.nag.android.volumemanager.VolumeManager;
-import com.nag.android.volumemanager.VolumeManager.STATUS;
 
 public class LocationSettingTest extends InstrumentationTestCase {
 

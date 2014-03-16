@@ -1,4 +1,4 @@
-package com.nag.android.volumemanager;
+package com.nag.android.ringmanager;
 
 import static java.lang.Math.acos;
 import static java.lang.Math.cos;
@@ -9,8 +9,9 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.location.Location;
 
+import com.nag.android.ringmanager.RingManager.STATUS;
 import com.nag.android.util.PreferenceHelper;
-import com.nag.android.volumemanager.VolumeManager.STATUS;
+import com.nag.android.volumemanager.R;
 
 public class LocationSetting{
 	public interface OnLocationAddedListener{

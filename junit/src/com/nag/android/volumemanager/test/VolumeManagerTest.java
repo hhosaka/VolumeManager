@@ -7,16 +7,16 @@ import android.location.Location;
 import android.media.AudioManager;
 import android.test.InstrumentationTestCase;
 
+import com.nag.android.ringmanager.LocationSetting;
+import com.nag.android.ringmanager.ScheduleSetting;
+import com.nag.android.ringmanager.RingManager;
+import com.nag.android.ringmanager.RingManager.PRIORITY;
+import com.nag.android.ringmanager.RingManager.STATUS;
 import com.nag.android.util.PreferenceHelper;
-import com.nag.android.volumemanager.LocationSetting;
-import com.nag.android.volumemanager.ScheduleSetting;
-import com.nag.android.volumemanager.VolumeManager;
-import com.nag.android.volumemanager.VolumeManager.PRIORITY;
-import com.nag.android.volumemanager.VolumeManager.STATUS;
 
 public class VolumeManagerTest extends InstrumentationTestCase{
 
-	VolumeManager instance=null;
+	RingManager instance=null;
 	private STATUS status_result;
 	private MockLocationSetting ls;
 	private MockScheduleSetting ss;
@@ -56,7 +56,7 @@ public class VolumeManagerTest extends InstrumentationTestCase{
 
 	protected void setUp(){
 		PreferenceHelper pref=new PreferenceHelper(getApplicationContext());
-		instance=new VolumeManager(pref
+		instance=new RingManager(pref
 		,(AudioManager)getApplicationContext().getSystemService(Context.AUDIO_SERVICE)
 		,ls=new MockLocationSetting(getApplicationContext(), pref)
 		,ss=new MockScheduleSetting(getApplicationContext(), pref));
@@ -118,7 +118,7 @@ public class VolumeManagerTest extends InstrumentationTestCase{
 	STATUS invokeDoAuto(Context context){
 		Method method;
 		try {
-			method = VolumeManager.class.getDeclaredMethod("doAuto",Context.class);
+			method = RingManager.class.getDeclaredMethod("doAuto",Context.class);
 			method.setAccessible(true);
 			return (STATUS)method.invoke(instance, context);
 		} catch (Exception e) {
@@ -168,7 +168,7 @@ public class VolumeManagerTest extends InstrumentationTestCase{
 	STATUS invokeCalcStatus(STATUS st1, STATUS st2){
 		Method method;
 		try {
-			method = VolumeManager.class.getDeclaredMethod("pickStatus", STATUS.class,STATUS.class);
+			method = RingManager.class.getDeclaredMethod("pickStatus", STATUS.class,STATUS.class);
 			method.setAccessible(true);
 			return (STATUS)method.invoke(instance, st1, st2);
 		} catch (Exception e) {

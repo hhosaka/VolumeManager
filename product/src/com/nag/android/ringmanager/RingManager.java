@@ -2,7 +2,7 @@ package com.nag.android.ringmanager;
 
 import com.nag.android.ringmanager.LocationHelper.OnLocationCollectedListener;
 import com.nag.android.util.PreferenceHelper;
-import com.nag.android.volumemanager.R;
+import com.nag.android.ringmanager.R;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -13,7 +13,7 @@ import android.location.Location;
 import android.media.AudioManager;
 
 public class RingManager implements OnLocationCollectedListener{
-	private final String PREF_VOLUME_MANAGER = "pref_volume_manager_";
+	private final String PREF_RING_MANAGER = "pref_ring_manager_";
 	private final String PREF_AUTO = "auto";
 //	private final String PREF_STATUS = "status";
 	private final String PREF_FREQUENCY = "frequency";
@@ -64,16 +64,16 @@ public class RingManager implements OnLocationCollectedListener{
 		auto=pref.getBoolean(PREF_AUTO, false);
 		set(this.getDeviceStatus());// TODO is is OK?
 //		this.frequency=pref.getInt(PREF_VOLUME_MANAGER+PREF_FREQUENCY, 1);
-		this.frequency=pref.getInt(PREF_VOLUME_MANAGER+PREF_FREQUENCY, 60);// TODO test
-		this.priority=PRIORITY.valueOf(pref.getString(PREF_VOLUME_MANAGER+PREF_PRIORITY, PRIORITY.silentfirst.toString()));
-		this.fineness=pref.getDouble(PREF_VOLUME_MANAGER+PREF_FINENESS, 0.5);
+		this.frequency=pref.getInt(PREF_RING_MANAGER+PREF_FREQUENCY, 60);// TODO test
+		this.priority=PRIORITY.valueOf(pref.getString(PREF_RING_MANAGER+PREF_PRIORITY, PRIORITY.silentfirst.toString()));
+		this.fineness=pref.getDouble(PREF_RING_MANAGER+PREF_FINENESS, 0.5);
 	}
 
 	private void save(){
 		pref.putBoolean(PREF_AUTO, auto);
-		pref.putInt(PREF_VOLUME_MANAGER+PREF_FREQUENCY, frequency);
-		pref.putString(PREF_VOLUME_MANAGER+PREF_PRIORITY, priority.toString());
-		pref.putDouble(PREF_VOLUME_MANAGER+PREF_FINENESS, fineness);
+		pref.putInt(PREF_RING_MANAGER+PREF_FREQUENCY, frequency);
+		pref.putString(PREF_RING_MANAGER+PREF_PRIORITY, priority.toString());
+		pref.putDouble(PREF_RING_MANAGER+PREF_FINENESS, fineness);
 	}
 
 	private RingManager(Context context, PreferenceHelper pref){

@@ -1,4 +1,4 @@
-package com.nag.android.volumemanager.controls;
+package com.nag.android.ringmanager.controls;
 
 import com.nag.android.ringmanager.RingManager.STATUS;
 import com.nag.android.util.Label;

@@ -11,7 +11,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
 
-    <com.nag.android.volumemanager.controls.StatusRotationButton
+    <com.nag.android.ringmanager.controls.StatusRotationButton
         android:id="@+id/buttonStatus"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

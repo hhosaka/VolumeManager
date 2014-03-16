@@ -1,4 +1,4 @@
-package com.nag.android.volumemanager.test;
+package com.nag.android.ringmanager.test;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -9,7 +9,7 @@ public class AllTests {
 		TestSuite suite = new TestSuite(AllTests.class.getName());
 		//$JUnit-BEGIN$
 		suite.addTestSuite(LocationSettingTest.class);
-		suite.addTestSuite(VolumeManagerTest.class);
+		suite.addTestSuite(RingManagerTest.class);
 		//$JUnit-END$
 		return suite;
 	}

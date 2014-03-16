@@ -1,4 +1,4 @@
-package com.nag.android.volumemanager.test;
+package com.nag.android.ringmanager.test;
 
 import java.lang.reflect.Method;
 
@@ -14,7 +14,7 @@ import com.nag.android.ringmanager.RingManager.PRIORITY;
 import com.nag.android.ringmanager.RingManager.STATUS;
 import com.nag.android.util.PreferenceHelper;
 
-public class VolumeManagerTest extends InstrumentationTestCase{
+public class RingManagerTest extends InstrumentationTestCase{
 
 	RingManager instance=null;
 	private STATUS status_result;

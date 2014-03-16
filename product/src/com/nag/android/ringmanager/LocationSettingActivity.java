@@ -4,7 +4,7 @@ import java.util.Calendar;
 
 import com.nag.android.ringmanager.LocationHelper.OnLocationCollectedListener;
 import com.nag.android.ringmanager.RingManager.STATUS;
-import com.nag.android.volumemanager.R;
+import com.nag.android.ringmanager.R;
 
 import android.location.Location;
 import android.os.Bundle;

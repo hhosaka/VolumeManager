@@ -11,7 +11,7 @@ import android.location.Location;
 
 import com.nag.android.ringmanager.RingManager.STATUS;
 import com.nag.android.util.PreferenceHelper;
-import com.nag.android.volumemanager.R;
+import com.nag.android.ringmanager.R;
 
 public class LocationSetting{
 	public interface OnLocationAddedListener{

@@ -1,4 +1,4 @@
-package com.nag.android.volumemanager.test;
+package com.nag.android.ringmanager.test;
 
 import java.lang.reflect.Method;
 

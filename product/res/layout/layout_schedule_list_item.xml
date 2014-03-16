@@ -12,7 +12,7 @@
         android:layout_weight="1"
         android:gravity="center"/>
 
-    <com.nag.android.volumemanager.controls.StatusSelector
+    <com.nag.android.ringmanager.controls.StatusSelector
         android:id="@+id/buttonStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

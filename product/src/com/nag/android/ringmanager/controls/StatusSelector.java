@@ -1,4 +1,4 @@
-package com.nag.android.volumemanager.controls;
+package com.nag.android.ringmanager.controls;
 
 import android.content.Context;
 import android.util.AttributeSet;

@@ -1,9 +1,9 @@
 package com.nag.android.ringmanager;
 
 import com.nag.android.ringmanager.RingManager.STATUS;
+import com.nag.android.ringmanager.controls.StatusRotationButton;
 import com.nag.android.util.RotationButton.OnValueChangedListener;
-import com.nag.android.volumemanager.R;
-import com.nag.android.volumemanager.controls.StatusRotationButton;
+import com.nag.android.ringmanager.R;
 
 import android.media.AudioManager;
 import android.os.Bundle;

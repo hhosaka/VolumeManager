@@ -1,12 +1,12 @@
 package com.nag.android.ringmanager;
 
 import com.nag.android.ringmanager.RingManager.STATUS;
+import com.nag.android.ringmanager.controls.StatusLabel;
+import com.nag.android.ringmanager.controls.StatusSelector;
 import com.nag.android.util.PreferenceHelper;
 import com.nag.android.util.PrimitiveLabel;
 import com.nag.android.util.PrimitiveSelector.OnSelectedListener;
-import com.nag.android.volumemanager.R;
-import com.nag.android.volumemanager.controls.StatusLabel;
-import com.nag.android.volumemanager.controls.StatusSelector;
+import com.nag.android.ringmanager.R;
 
 import android.os.Bundle;
 import android.app.Activity;

@@ -63,7 +63,6 @@ public class RingManager implements OnLocationCollectedListener{
 	private void load(){
 		auto=pref.getBoolean(PREF_AUTO, false);
 		set(this.getDeviceStatus());// TODO is is OK?
-//		this.frequency=pref.getInt(PREF_VOLUME_MANAGER+PREF_FREQUENCY, 1);
 		this.frequency=pref.getInt(PREF_RING_MANAGER+PREF_FREQUENCY, 60);// TODO test
 		this.priority=PRIORITY.valueOf(pref.getString(PREF_RING_MANAGER+PREF_PRIORITY, PRIORITY.silentfirst.toString()));
 		this.fineness=pref.getDouble(PREF_RING_MANAGER+PREF_FINENESS, 0.5);
@@ -160,7 +159,7 @@ public class RingManager implements OnLocationCollectedListener{
 /**
  * 
  * @param status it comes from device. for fail safe, it may gives up auto when status changes by outside,
- * @return true if VolumeManager gives up auto
+ * @return true if ringManager gives up auto
  */
 	public boolean confirmStatusChangeFromOutside(STATUS status){
 		if(resetauto && auto && get()!=status){

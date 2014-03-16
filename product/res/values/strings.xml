@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">VolumeManager</string>
+    <string name="app_name">RingManager</string>
     <string name="action_settings">Settings</string>
     <string name="location_default">Undefined Place</string>
     <string name="title_activity_location_setting">LocationSettingActivity</string>

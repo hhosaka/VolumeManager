@@ -1,5 +1,7 @@
 package com.nag.android.volumemanager;
 
+import java.util.Calendar;
+
 import com.nag.android.volumemanager.LocationHelper.OnLocationCollectedListener;
 import com.nag.android.volumemanager.VolumeManager.STATUS;
 
@@ -9,6 +11,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.View;
 import android.view.Window;
@@ -103,7 +106,7 @@ public class LocationSettingActivity extends Activity implements OnLocationColle
 
 	@Override
 	public void onFinishLocationCollection(Location location, RESULT result) {
-		edit(locationsetting.addCurrentLocation(this, location));
+		edit(locationsetting.addCurrentLocation(this, DateFormat.format("yyyy/MM/dd kk:mm:ss", Calendar.getInstance()).toString(), location));
 	}
 
 	@Override

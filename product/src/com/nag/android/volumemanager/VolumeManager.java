@@ -1,12 +1,5 @@
 package com.nag.android.volumemanager;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.util.Calendar;
-
 import com.nag.android.util.PreferenceHelper;
 import com.nag.android.volumemanager.LocationHelper.OnLocationCollectedListener;
 
@@ -15,43 +8,41 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap.CompressFormat;
 import android.location.Location;
 import android.media.AudioManager;
-import android.net.Uri;
-import android.text.format.DateFormat;
-import android.util.Log;
 
 public class VolumeManager implements OnLocationCollectedListener{
 	private final String PREF_VOLUME_MANAGER = "pref_volume_manager_";
-	private final String PREF_STATUS = "status";
-	private final String PREF_ENABLE_LOCATION = "enable_location";
-	private final String PREF_ENABLE_SCHEDULE = "enable_schedule";
+	private final String PREF_AUTO = "auto";
+//	private final String PREF_STATUS = "status";
 	private final String PREF_FREQUENCY = "frequency";
 	private final String PREF_PRIORITY = "priority";
 	private final String PREF_FINENESS = "fineness";
 
-	public interface OnFinishPerformListener{
-		void onFinishPerform(STATUS status);
-	}
-
 	private final PreferenceHelper pref;
 	private final AudioManager audiomanager;
-
 	private static VolumeManager instance;
 
-	public enum STATUS {uncontrol, enable, manner, silent, auto, follow, confirming};
+	public enum STATUS {uncontrol, enable, manner, silent, auto, follow,na};
 	public enum PRIORITY {schedulefirst, locationfirst, silentfirst, ringfirst};
 	private final LocationSetting locationsetting;
 	private final ScheduleSetting schedulesetting;
 	private PRIORITY priority=PRIORITY.schedulefirst;
 	private int frequency=1;
 	private STATUS status=null;
-	private STATUS sub_status=null;
-	private double fineness=1.0;
+//	private STATUS sub_status=null;
+	private double fineness=0.0;
+	private boolean auto;
 	private boolean resetauto;
-	private OnFinishPerformListener listener=null;
-	
+
+	private STATUS get(){
+		return status;
+	}
+
+	private STATUS set(STATUS status){
+		return this.status=status;
+	}
+
 	public static VolumeManager getInstance(Context context){
 		if(instance==null){
 			instance=new VolumeManager(context, PreferenceHelper.getInstance(context));
@@ -59,25 +50,32 @@ public class VolumeManager implements OnLocationCollectedListener{
 		return instance;
 	}
 
+	//for debug
 	public VolumeManager(PreferenceHelper pref, AudioManager audiomanager, LocationSetting locationsetting, ScheduleSetting schedulesetting){
 		this.pref=pref;
 		this.audiomanager=audiomanager;
 		this.locationsetting=locationsetting;
 		this.schedulesetting=schedulesetting;
-		load(pref);
+		load();
 	}
 
-	private void load(PreferenceHelper pref){
-		status=STATUS.valueOf(pref.getString(PREF_VOLUME_MANAGER+PREF_STATUS,STATUS.uncontrol.toString()));
-		locationsetting.setEnable(pref.getBoolean(PREF_VOLUME_MANAGER+PREF_ENABLE_LOCATION, true));
-		schedulesetting.setEnable(pref.getBoolean(PREF_VOLUME_MANAGER+PREF_ENABLE_SCHEDULE, true));
+	private void load(){
+		auto=pref.getBoolean(PREF_AUTO, false);
+		set(this.getDeviceStatus());// TODO is is OK?
 //		this.frequency=pref.getInt(PREF_VOLUME_MANAGER+PREF_FREQUENCY, 1);
 		this.frequency=pref.getInt(PREF_VOLUME_MANAGER+PREF_FREQUENCY, 60);// TODO test
 		this.priority=PRIORITY.valueOf(pref.getString(PREF_VOLUME_MANAGER+PREF_PRIORITY, PRIORITY.silentfirst.toString()));
-		this.fineness=pref.getDouble(PREF_VOLUME_MANAGER+PREF_FINENESS, 1.0);
+		this.fineness=pref.getDouble(PREF_VOLUME_MANAGER+PREF_FINENESS, 0.5);
 	}
 
-	public VolumeManager(Context context, PreferenceHelper pref){
+	private void save(){
+		pref.putBoolean(PREF_AUTO, auto);
+		pref.putInt(PREF_VOLUME_MANAGER+PREF_FREQUENCY, frequency);
+		pref.putString(PREF_VOLUME_MANAGER+PREF_PRIORITY, priority.toString());
+		pref.putDouble(PREF_VOLUME_MANAGER+PREF_FINENESS, fineness);
+	}
+
+	private VolumeManager(Context context, PreferenceHelper pref){
 		this(pref
 				,(AudioManager)context.getSystemService(Context.AUDIO_SERVICE)
 				, new LocationSetting(context, pref)
@@ -89,14 +87,13 @@ public class VolumeManager implements OnLocationCollectedListener{
 	}
 
 	public boolean isAuto(){
-		return status==STATUS.auto;
+		return auto;
 	}
 
 	public void setPriority(Context context, PRIORITY priority){
 		this.priority=priority;
-		if(isAuto()){
-			doAuto(context, null);
-		}
+		save();
+		doAuto(context);
 	}
 
 	public boolean getEnableLocation(){
@@ -105,6 +102,7 @@ public class VolumeManager implements OnLocationCollectedListener{
 
 	public void setEnableLocation(boolean value){
 		locationsetting.setEnable(value);
+		save();
 	}
 
 	public boolean getEnableSchedule(){
@@ -113,6 +111,7 @@ public class VolumeManager implements OnLocationCollectedListener{
 
 	public void setEnableSchedule(boolean value){
 		schedulesetting.setEnable(value);
+		save();
 	}
 
 	public LocationSetting getLocationSetting(){
@@ -129,6 +128,7 @@ public class VolumeManager implements OnLocationCollectedListener{
 
 	public void setFrequency(int frequency){
 		this.frequency=frequency;
+		save();
 	}
 
 	public double getFineness(){
@@ -137,6 +137,7 @@ public class VolumeManager implements OnLocationCollectedListener{
 
 	public void setFineness(double fineness){
 		this.fineness=fineness;
+		save();
 	}
 
 	public boolean getResetAuto(){
@@ -145,29 +146,31 @@ public class VolumeManager implements OnLocationCollectedListener{
 
 	public void setResetAuto(boolean resetauto){
 		this.resetauto=resetauto;
+		save();
 	}
 
 	public STATUS getStatus(){
-		return status;
+		return get();
 	}
 
-	public STATUS getSubStatus(){
-		return sub_status;
-	}
+//	public STATUS getSubStatus(){
+//		return sub_status;
+//	}
 /**
  * 
  * @param status it comes from device. for fail safe, it may gives up auto when status changes by outside,
  * @return true if VolumeManager gives up auto
  */
 	public boolean confirmStatusChangeFromOutside(STATUS status){
-		if(resetauto && this.status==STATUS.auto && status!=sub_status){
-			this.status=status;
+		if(resetauto && auto && get()!=status){
+			auto=false;
+			set(status);
 			return true;
 		}
 		return false;
 	}
 
-	static STATUS convDeviceStatus(int device_status){
+	static STATUS convParam2Status(int device_status){
 		switch(device_status){
 		case AudioManager.RINGER_MODE_NORMAL:
 			return STATUS.enable;
@@ -180,68 +183,15 @@ public class VolumeManager implements OnLocationCollectedListener{
 		}
 	}
 
-	private void doAuto(Context context, OnFinishPerformListener listener){
-		assert(status==STATUS.auto);
-		if(locationsetting.getEnable()){
-			this.listener=listener;
-			new LocationHelper(context).start(false, fineness, this);
-		}else{
-			setStatusToDevice(context, sub_status=pickStatus(STATUS.uncontrol, schedulesetting.getStatus()));
-			listener.onFinishPerform(sub_status);
-		}
-	}
-
-	public STATUS setStatus(Context context){
-		setStatus(context, status, null);
-		return status;
-	}
-
-	public void setStatus(Context context, STATUS status, OnFinishPerformListener listener){
-		this.status=status;
-		pref.putString(PREF_STATUS, status.toString());
-		if(status==STATUS.auto){
-			sub_status=STATUS.confirming;
-			this.listener=listener;
-			StartCheckingReciever.Start(context, getRepeatTime());
-		}else{
-			setStatusToDevice(context, status);
-			if(listener!=null){listener.onFinishPerform(status);}
-		}
-	}
-
-	private int number=0;
-	private void sendNotification(Context context, STATUS status) {// TODO just for testing
-		if(context!=null)
-		{
-			NotificationManager manager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-			Notification n = new Notification();
-			Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:1234567890"));
-			PendingIntent pi = PendingIntent.getActivity(context, 0, intent, 0);
-			
-			n.icon = R.drawable.ic_launcher;
-			n.tickerText = "status changed to"+status;
-			n.number = number;
-			n.setLatestEventInfo(context, context.getString(R.string.app_name), "("+DateFormat.format("kk:mm:ss", Calendar.getInstance()).toString()+") status changed to "+ status, pi);
-			
-			manager.notify(number++, n);
-		}
-	}
-
-	private void setStatusToDevice(Context context, STATUS status){
-		sendNotification(context, status);
-		Log.d("HDEBUG","setStatusToDevice="+status);
+	private static int convStatus2Param(STATUS status){
 		switch(status){
 		case enable:
-			audiomanager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-			break;
+			return AudioManager.RINGER_MODE_NORMAL;
 		case manner:
-			audiomanager.setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
-			break;
+			return AudioManager.RINGER_MODE_VIBRATE;
 		case silent:
-			audiomanager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
-			break;
+			return AudioManager.RINGER_MODE_SILENT;
 		case uncontrol:
-			break;
 		case auto:
 		default:
 			throw new RuntimeException();
@@ -251,8 +201,69 @@ public class VolumeManager implements OnLocationCollectedListener{
 	@Override
 	public void onFinishLocationCollection(Location location, RESULT result) {
 		if(result==RESULT.resultOK){
-			setStatusToDevice(null, sub_status=pickStatus(locationsetting.getStatus(location), schedulesetting.getStatus()));
-			if(listener!=null){listener.onFinishPerform(sub_status);}
+			resolveStatus(null, set(pickStatus(locationsetting.getStatus(location), schedulesetting.getStatus())));
+		}
+	}
+
+	public void setStatus(Context context){
+		setStatus(context, get());
+	}
+
+	public void setStatus(Context context, STATUS status){
+		set(status);
+		if(status==STATUS.auto){
+			auto=true;
+			StatusRefreshReciever.Start(context, getRepeatTime());
+		}else{
+			StatusRefreshReciever.Stop(context);
+			auto=false;
+			resolveStatus(context, get());
+		}
+	}
+
+	void doAuto(Context context){//TODO lock
+		if(isAuto()){
+			if(locationsetting.getEnable()){
+				new LocationHelper(context).start(false, fineness, this);
+			}else{
+				resolveStatus(context, set(pickStatus(STATUS.uncontrol, schedulesetting.getStatus())));
+			}
+		}
+	}
+
+	private STATUS getDeviceStatus(){
+		return convParam2Status(audiomanager.getRingerMode());
+	}
+
+	public void resolveStatus(Context context, STATUS status){
+		switch(status)
+		{
+		case uncontrol:
+			break;
+		case enable:
+		case manner:
+		case silent:
+			if(get()!=status){
+				set(status);
+				sendNotification(context, get());
+				audiomanager.setRingerMode(convStatus2Param(get()));
+			}
+		}
+	}
+
+	private void sendNotification(Context context, STATUS status) {// TODO just for testing
+		if(context!=null)
+		{
+			NotificationManager manager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+			Notification notificationn = new Notification();
+			Intent intent = new Intent(context, MainActivity.class);
+			
+			notificationn.icon = R.drawable.ic_launcher;
+			notificationn.tickerText = "status changed to "+get();
+			notificationn.number = 0;
+			notificationn.setLatestEventInfo(context, context.getString(R.string.app_name), "application changed to "+ get(), PendingIntent.getActivity(context, 0, intent, 0));
+			
+			manager.notify(0, notificationn);
 		}
 	}
 

@@ -22,7 +22,7 @@ public class LocationHelper implements LocationListener{
 	private double limit_accuracy=0.0;
 
 	public interface OnLocationCollectedListener{
-		enum RESULT{resultOK,resultRetryError,resultDisabled};
+		public enum RESULT{resultOK,resultRetryError,resultDisabled};
 		void onFinishLocationCollection(Location location, RESULT result);
 	}
 
@@ -43,7 +43,7 @@ public class LocationHelper implements LocationListener{
 	private boolean startByGPS(double fineness, OnLocationCollectedListener listener){
 		if (manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
 			manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-			limit_accuracy=LIMIT_ACCURACY_4_GPS * fineness;
+			limit_accuracy=LIMIT_ACCURACY_4_GPS / fineness;
 			return true;
 		}
 		return false;
@@ -52,7 +52,7 @@ public class LocationHelper implements LocationListener{
 	private boolean startByNet(double fineness, OnLocationCollectedListener listener){
 		if(manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
 			manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
-			limit_accuracy=LIMIT_ACCURACY_4_NET * fineness;
+			limit_accuracy=LIMIT_ACCURACY_4_NET / fineness;
 			return true;
 		}
 		return false;

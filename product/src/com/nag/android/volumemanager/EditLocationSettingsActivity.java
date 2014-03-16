@@ -1,6 +1,8 @@
 package com.nag.android.volumemanager;
 
 import com.nag.android.volumemanager.VolumeManager.STATUS;
+import com.nag.android.volumemanager.controls.StatusLabel;
+import com.nag.android.volumemanager.controls.StatusSelector;
 
 import android.os.Bundle;
 import android.app.Activity;
@@ -24,12 +26,12 @@ public class EditLocationSettingsActivity extends Activity{
 
 		index=getIntent().getIntExtra(PARAM_INDEX, 0);
 		((EditText) findViewById(R.id.textLocationName)).setText(getIntent().getStringExtra(PARAM_TITLE));
-		StatusSelector s=((StatusSelector)findViewById(R.id.buttonStatus));
-		s.add("Enable",STATUS.enable);
-		s.add("Manner",STATUS.manner);
-		s.add("Silent",STATUS.silent);
-		s.add("Uncontrol",STATUS.uncontrol);
-		s.setStatus(STATUS.valueOf(getIntent().getStringExtra(PARAM_STATUS)));
+		StatusSelector selector=((StatusSelector)findViewById(R.id.buttonStatus));
+		selector.add(new StatusLabel(STATUS.enable.toString(), STATUS.enable));
+		selector.add(new StatusLabel(STATUS.manner.toString(), STATUS.manner));
+		selector.add(new StatusLabel(STATUS.silent.toString(), STATUS.silent));
+		selector.add(new StatusLabel(STATUS.uncontrol.toString(), STATUS.uncontrol));
+		selector.setStatus(STATUS.valueOf(getIntent().getStringExtra(PARAM_STATUS)));
 		findViewById(R.id.buttonDone).setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v) {

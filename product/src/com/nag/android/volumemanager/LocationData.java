@@ -4,7 +4,7 @@ import java.util.StringTokenizer;
 
 import com.nag.android.volumemanager.VolumeManager.STATUS;
 
-class LocationData{
+public class LocationData{
 	public enum TYPE {typeDefault, typeProtected, typeEditable};
 	private String title;
 	private double latitude;

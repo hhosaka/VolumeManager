@@ -3,17 +3,17 @@ package com.nag.android.volumemanager.test;
 import java.lang.reflect.Method;
 
 import android.content.Context;
+import android.location.Location;
 import android.media.AudioManager;
 import android.test.InstrumentationTestCase;
+import android.util.Log;
 
+import com.nag.android.mock.MockLocation;
 import com.nag.android.util.PreferenceHelper;
+import com.nag.android.volumemanager.LocationData;
 import com.nag.android.volumemanager.LocationSetting;
 import com.nag.android.volumemanager.VolumeManager;
 import com.nag.android.volumemanager.VolumeManager.STATUS;
-import com.nag.android.volumemanager.test.VolumeManagerTest.MockLocationSetting;
-import com.nag.android.volumemanager.test.VolumeManagerTest.MockScheduleSetting;
-
-import junit.framework.TestCase;
 
 public class LocationSettingTest extends InstrumentationTestCase {
 
@@ -37,7 +37,7 @@ public class LocationSettingTest extends InstrumentationTestCase {
 	double invokeDistance(double la1, double lg1, double la2, double lg2){
 		Method method;
 		try {
-			method = VolumeManager.class.getDeclaredMethod("distance", STATUS.class,STATUS.class);
+			method = LocationSetting.class.getDeclaredMethod("distance",double.class,double.class,double.class,double.class);
 			method.setAccessible(true);
 			return (Double)method.invoke(instance, la1, lg1, la2, lg2);
 		} catch (Exception e) {
@@ -46,8 +46,30 @@ public class LocationSettingTest extends InstrumentationTestCase {
 		}
 	}
 
-	void testDistance(){
-		assertTrue(invokeDistance(lat1, lng1, lat2, lng2)<100.0);
-		assertTrue(invokeDistance(lat1, lng1, lat3, lng3)>100.0);
+	public void testDistance(){
+		assertTrue(invokeDistance(lat1, lng1, lat2, lng2)<30.0);
+		assertTrue(invokeDistance(lat1, lng1, lat3, lng3)>500.0);
+	}
+
+	private LocationData invokeGetLocationData(Location location){
+		Method method;
+		try {
+			method = LocationSetting.class.getDeclaredMethod("getLocationData",Location.class);
+			method.setAccessible(true);
+			return (LocationData)method.invoke(instance, location);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
+	}
+
+	private Location location1=new MockLocation(lat1,lng1,100.0f);
+	private Location location2=new MockLocation(lat2,lng2,100.0f);
+	private Location location3=new MockLocation(lat3,lng3,100.0f);
+
+	public void testGetLocationData(){
+		instance.addCurrentLocation(getApplicationContext(),"test1", location1);
+		instance.addCurrentLocation(getApplicationContext(), "test2", location3);
+		assertEquals(invokeGetLocationData(location1).getTitle(),"test1");
 	}
 }

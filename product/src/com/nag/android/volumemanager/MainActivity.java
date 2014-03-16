@@ -1,11 +1,8 @@
 package com.nag.android.volumemanager;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
-import com.nag.android.util.PreferenceHelper;
+import com.nag.android.util.RotationButton.OnValueChangedListener;
 import com.nag.android.volumemanager.VolumeManager.STATUS;
+import com.nag.android.volumemanager.controls.StatusRotationButton;
 
 import android.media.AudioManager;
 import android.os.Bundle;
@@ -18,67 +15,24 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ToggleButton;
 
 public class MainActivity extends Activity{
 
-	private Map<STATUS, String> status2label=new HashMap<STATUS, String>(){
-		private static final long serialVersionUID = 1L;
-		{
-			put(STATUS.enable, "Enable");
-			put(STATUS.manner, "Manner");
-			put(STATUS.silent, "Silent");
-			put(STATUS.auto, "Auto(Checking...)");
-		}
-	};
-
-	private Iterator<STATUS> iterator=status2label.keySet().iterator();
 	private VolumeManager vm;
 	private StatusChangedReciever reciever=null;
-
-	private STATUS getNextSTATUS(){
-		assert(iterator!=null);
-		if(!iterator.hasNext()){
-			iterator=status2label.keySet().iterator();
-		}
-		return iterator.next();
-	}
-
+	private StatusRotationButton btnStatus=null; 
+	
 	class StatusChangedReciever extends BroadcastReceiver{
 		@Override
 		public void onReceive(Context context, Intent intent) {//TODO ÇÍÇµÅOÉoÅ[ÇÃÇ†Ç∆ÇµÇ‹Ç¬
 			if (intent.getAction().equals(AudioManager.RINGER_MODE_CHANGED_ACTION)) {
-				String buf;
-				STATUS status=VolumeManager.convDeviceStatus(intent.getIntExtra(AudioManager.EXTRA_RINGER_MODE, -1));
+				STATUS status=VolumeManager.convParam2Status(intent.getIntExtra(AudioManager.EXTRA_RINGER_MODE, -1));
 				vm.confirmStatusChangeFromOutside(status);
-				setStatusTitle();
-				if(vm.isAuto()){
-					buf="Auto("+getStatusLabel(getApplicationContext(), status)+")";
-				}else{
-					buf=getStatusLabel(getApplicationContext(), status);
-				}
-				((Button)findViewById(R.id.buttonStatus)).setText(buf);
+				btnStatus.setStatus(vm.isAuto(), vm.getStatus());
 			}
-		}
-	}
-
-	private static String getStatusLabel(Context context, STATUS status){
-		switch(status){
-		case enable:
-			return context.getString(R.string.label_enable);
-		case manner:
-			return context.getString(R.string.label_manner);
-		case silent:
-			return context.getString(R.string.label_silent);
-		case uncontrol:
-			return context.getString(R.string.label_uncontrol);
-		case confirming:
-			return context.getString(R.string.label_delete);
-		default:
-			throw new RuntimeException();
 		}
 	}
 
@@ -87,30 +41,41 @@ public class MainActivity extends Activity{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		PreferenceHelper pref=new PreferenceHelper(this);
-		vm=new VolumeManager(this, pref);
+//		PreferenceHelper pref=new PreferenceHelper(this);
+		vm=VolumeManager.getInstance(this);
 		initStatusButton();
 		initScheduleButtons();
 		initLocationButtons();
-		setStatusTitle();
-		vm.setStatus(this);
+		vm.doAuto(this);
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
+		registerReceiver(reciever=new StatusChangedReciever(),filter);
 	}
 
-	private void setStatusTitle() {
-		String buf;
-		if(vm.isAuto()){
-			IntentFilter filter = new IntentFilter();
-			filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
-			registerReceiver(reciever=new StatusChangedReciever(),filter);
-			buf="Auto"+"("+getStatusLabel(getApplicationContext(), vm.getSubStatus())+")";
-		}else{
-			if(reciever!=null){
-				unregisterReceiver(reciever);
-				reciever=null;
-			}
-			buf=getStatusLabel(getApplicationContext(), vm.getStatus());
+	@Override
+	protected void onDestroy()
+	{
+		super.onDestroy();
+		if(reciever!=null){
+			unregisterReceiver(reciever);
+			reciever=null;
 		}
-		((Button)findViewById(R.id.buttonStatus)).setText(buf);
+	}
+
+	private void initStatusButton() {
+		btnStatus=(StatusRotationButton)findViewById(R.id.buttonStatus);
+		btnStatus.add(getString(R.string.label_enable), STATUS.enable);
+		btnStatus.add(getString(R.string.label_manner), STATUS.manner);
+		btnStatus.add(getString(R.string.label_silent), STATUS.silent);
+		btnStatus.add(getString(R.string.label_uncontrol), STATUS.uncontrol);
+		btnStatus.add(getString(R.string.label_auto_confirming), STATUS.auto);
+		btnStatus.setStatus(vm.isAuto(), vm.getStatus());
+		btnStatus.setOnValueChangedListener(new OnValueChangedListener<STATUS>(){
+			@Override
+			public void OnValueChanged(STATUS value) {
+				vm.setStatus(MainActivity.this, value);
+			}
+		});
 	}
 
 	private void initLocationButtons() {
@@ -143,17 +108,6 @@ public class MainActivity extends Activity{
 			@Override
 			public void onClick(View arg0) {
 				startActivity(new Intent(MainActivity.this,ScheduleSettingActivity.class));
-			}
-		});
-	}
-
-	private void initStatusButton() {
-		Button btnStatus=(Button)findViewById(R.id.buttonStatus);
-		btnStatus.setOnClickListener(new OnClickListener(){
-			@Override
-			public void onClick(View v) {
-				vm.setStatus(getApplicationContext(), getNextSTATUS(), null);
-				setStatusTitle();
 			}
 		});
 	}

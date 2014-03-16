@@ -5,11 +5,9 @@ import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 
 import android.content.Context;
 import android.location.Location;
-import android.text.format.DateFormat;
 
 import com.nag.android.util.PreferenceHelper;
 import com.nag.android.volumemanager.VolumeManager.STATUS;
@@ -24,17 +22,19 @@ public class LocationSetting{
 	}
 	private static final double MAX_LOCATION=32;
 	private static final String PREF_LOCATION="location_";
+	private static final String PREF_LOCATION_ENABLE="location_enable";
 
 
 	private final ArrayList<LocationData> locations=new ArrayList<LocationData>();
 	private final PreferenceHelper pref;
-	private final LocationData locationDefault;;
+	private final LocationData locationDefault;
 	private boolean enable=true;
 
 	public LocationSetting(Context context, PreferenceHelper pref){
 		this.pref=pref;
 		this.locationDefault=new LocationData(context.getString(R.string.location_default), 0.0, 0.0, STATUS.uncontrol, LocationData.TYPE.typeDefault);
-		loadAll(context);
+		loadSetting();
+		loadDataAll(context);
 	}
 
 	public boolean getEnable(){
@@ -43,16 +43,17 @@ public class LocationSetting{
 
 	public void setEnable(boolean value){
 		enable=value;
+		saveSetting();
 	}
 
 	public boolean hasSpace(){
 		return locations.size()<MAX_LOCATION;
 	}
 
-	public int addCurrentLocation(Context context, Location location){
+	public int addCurrentLocation(Context context, String title, Location location){
 		if(locations.size()<MAX_LOCATION){
 			if(getLocationData(location)==locationDefault){
-				LocationData data=new LocationData(DateFormat.format("yyyy/MM/dd kk:mm:ss", Calendar.getInstance()).toString(), location.getLatitude(), location.getLongitude(),STATUS.uncontrol,LocationData.TYPE.typeEditable );
+				LocationData data=new LocationData(title, location.getLatitude(), location.getLongitude(),STATUS.uncontrol,LocationData.TYPE.typeEditable );
 				locations.add(data);
 				save(data,locations.size()-1);
 				return locations.size()-1;
@@ -88,11 +89,19 @@ public class LocationSetting{
 		}
 	}
 
-	private LocationData load(Context context, int index){
+	private void loadSetting(){
+		enable=pref.getBoolean(PREF_LOCATION_ENABLE,true);
+	}
+
+	private void saveSetting(){
+		pref.putBoolean(PREF_LOCATION_ENABLE,enable);
+	}
+
+	private LocationData loadData(Context context, int index){
 		if(index==0){
 			return locationDefault;
 		}else{
-			String buf=PreferenceHelper.getInstance(context).getString(PREF_LOCATION+String.valueOf(index),null);
+			String buf=pref.getString(PREF_LOCATION+String.valueOf(index),null);
 			if(buf==null){
 				return null;
 			}else{
@@ -101,7 +110,7 @@ public class LocationSetting{
 		}
 	}
 
-	void saveAll(Context context){
+	private void saveAll(Context context){
 		int i=0;
 		for(LocationData location:locations){
 			save(location, i++);
@@ -109,11 +118,11 @@ public class LocationSetting{
 		pref.remove(PREF_LOCATION+String.valueOf(i));
 	}
 
-	public void loadAll(Context context){
+	private void loadDataAll(Context context){
 		locations.clear();
 		int index=0;
 		LocationData locationdata;
-		while((locationdata=load(context,index++))!=null){
+		while((locationdata=loadData(context,index++))!=null){
 			locations.add(locationdata);
 		}
 		if(locations.size()==0){

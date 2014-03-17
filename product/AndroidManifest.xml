@@ -39,7 +39,7 @@
         <activity
             android:name="com.nag.android.ringmanager.WebViewActivity">
         </activity>
-        <receiver android:name="com.nag.android.ringmanager.StatusRefreshReciever"/>
+        <receiver android:name="com.nag.android.ringmanager.AutoReceiver"/>
         </application>
 
 </manifest>

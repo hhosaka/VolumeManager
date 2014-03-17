@@ -7,9 +7,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.SystemClock;
 
-public class StatusRefreshReciever extends BroadcastReceiver {
+public class AutoReceiver extends BroadcastReceiver {
 	private static PendingIntent getIntent(Context context){
-		return PendingIntent.getBroadcast(context.getApplicationContext(), 0, new Intent(context, StatusRefreshReciever.class), 0);
+		return PendingIntent.getBroadcast(context.getApplicationContext(), 0, new Intent(context, AutoReceiver.class), 0);
 	}
 	private static AlarmManager getManager(Context context){
 		return (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
@@ -24,7 +24,7 @@ public class StatusRefreshReciever extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		if(RingManager.getInstance(context).isAuto())
+		if(RingManager.getInstance(context).isAuto())// TODO : need guard
 		{
 			RingManager.getInstance(context).doAuto(context);
 		}

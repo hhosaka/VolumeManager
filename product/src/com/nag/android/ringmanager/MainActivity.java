@@ -2,6 +2,7 @@ package com.nag.android.ringmanager;
 
 import com.nag.android.ringmanager.RingManager.STATUS;
 import com.nag.android.ringmanager.controls.StatusRotationButton;
+import com.nag.android.util.Label;
 import com.nag.android.util.RotationButton.OnValueChangedListener;
 import com.nag.android.ringmanager.R;
 
@@ -22,17 +23,16 @@ import android.widget.ToggleButton;
 
 public class MainActivity extends Activity{
 
-	private RingManager vm;
-	private StatusChangedReciever reciever=null;
+	private RingManager ringmanager;
+	private StatusMonitor statusmonitor=null;
 	private StatusRotationButton btnStatus=null; 
-	
-	class StatusChangedReciever extends BroadcastReceiver{
+
+	class StatusMonitor extends BroadcastReceiver{
 		@Override
-		public void onReceive(Context context, Intent intent) {//TODO ÇÍÇµÅOÉoÅ[ÇÃÇ†Ç∆ÇµÇ‹Ç¬
+		public void onReceive(Context context, Intent intent) {
 			if (intent.getAction().equals(AudioManager.RINGER_MODE_CHANGED_ACTION)) {
 				STATUS status=RingManager.convParam2Status(intent.getIntExtra(AudioManager.EXTRA_RINGER_MODE, -1));
-				vm.confirmStatusChangeFromOutside(status);
-				btnStatus.setStatus(vm.isAuto(), vm.getStatus());
+				btnStatus.setValue(ringmanager.confirm(status));
 			}
 		}
 	}
@@ -42,50 +42,62 @@ public class MainActivity extends Activity{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-//		PreferenceHelper pref=new PreferenceHelper(this);
-		vm=RingManager.getInstance(this);
+		ringmanager=RingManager.getInstance(this);
 		initStatusButton();
 		initScheduleButtons();
 		initLocationButtons();
-		vm.doAuto(this);
+		ringmanager.doAuto(this);
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
-		registerReceiver(reciever=new StatusChangedReciever(),filter);
+		registerReceiver(statusmonitor=new StatusMonitor(),filter);
 	}
 
 	@Override
 	protected void onDestroy()
 	{
 		super.onDestroy();
-		if(reciever!=null){
-			unregisterReceiver(reciever);
-			reciever=null;
+		if(statusmonitor!=null){
+			unregisterReceiver(statusmonitor);
+			statusmonitor=null;
 		}
 	}
 
-	private void initStatusButton() {
+	class AutoLabel extends Label<STATUS>
+	{
+		public AutoLabel(String label, STATUS value) {
+			super(label, value);
+		}
+		public String toString(){
+			if(ringmanager.isAuto()){
+				return "Auto(" + ringmanager.getStatus() +")";
+			}else{
+				return super.toString();
+			}
+		}
+	}
+
+	private void initStatusButton(){
 		btnStatus=(StatusRotationButton)findViewById(R.id.buttonStatus);
-		btnStatus.add(getString(R.string.label_enable), STATUS.enable);
-		btnStatus.add(getString(R.string.label_manner), STATUS.manner);
-		btnStatus.add(getString(R.string.label_silent), STATUS.silent);
-		btnStatus.add(getString(R.string.label_uncontrol), STATUS.uncontrol);
-		btnStatus.add(getString(R.string.label_auto_confirming), STATUS.auto);
-		btnStatus.setStatus(vm.isAuto(), vm.getStatus());
+		btnStatus.add(new AutoLabel(getString(R.string.label_enable), STATUS.enable));
+		btnStatus.add(new AutoLabel(getString(R.string.label_manner), STATUS.manner));
+		btnStatus.add(new AutoLabel(getString(R.string.label_silent), STATUS.silent));
+		btnStatus.add(new AutoLabel(getString(R.string.label_auto), STATUS.auto));
+		btnStatus.setValue(ringmanager.getStatus());
 		btnStatus.setOnValueChangedListener(new OnValueChangedListener<STATUS>(){
 			@Override
 			public void OnValueChanged(STATUS value) {
-				vm.setStatus(MainActivity.this, value);
+				ringmanager.setStatus(MainActivity.this,value);
 			}
 		});
 	}
 
 	private void initLocationButtons() {
 		ToggleButton tb=((ToggleButton)findViewById(R.id.buttonByLocation));
-		tb.setChecked(vm.getEnableLocation());
+		tb.setChecked(ringmanager.getEnableLocation());
 		tb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
-				vm.setEnableLocation(isChecked);
+				ringmanager.setEnableLocation(isChecked);
 			}
 		});
 		findViewById(R.id.buttonByLocationSetting).setOnClickListener(new OnClickListener() {
@@ -98,11 +110,11 @@ public class MainActivity extends Activity{
 
 	private void initScheduleButtons() {
 		ToggleButton tb=((ToggleButton)findViewById(R.id.buttonBySchedule));
-		tb.setChecked(vm.getEnableSchedule());
+		tb.setChecked(ringmanager.getEnableSchedule());
 		tb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
-				vm.setEnableSchedule(isChecked);
+				ringmanager.setEnableSchedule(isChecked);
 			}
 		});
 		findViewById(R.id.buttonByScheduleSetting).setOnClickListener(new OnClickListener() {

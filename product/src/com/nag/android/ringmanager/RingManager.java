@@ -62,8 +62,8 @@ public class RingManager implements OnLocationCollectedListener{
 
 	private void load(){
 		auto=pref.getBoolean(PREF_AUTO, false);
-		set(this.getDeviceStatus());// TODO is is OK?
-		this.frequency=pref.getInt(PREF_RING_MANAGER+PREF_FREQUENCY, 60);// TODO test
+		set(this.getDeviceStatus());
+		this.frequency=pref.getInt(PREF_RING_MANAGER+PREF_FREQUENCY, 1);// TODO test
 		this.priority=PRIORITY.valueOf(pref.getString(PREF_RING_MANAGER+PREF_PRIORITY, PRIORITY.silentfirst.toString()));
 		this.fineness=pref.getDouble(PREF_RING_MANAGER+PREF_FINENESS, 0.5);
 	}
@@ -161,13 +161,18 @@ public class RingManager implements OnLocationCollectedListener{
  * @param status it comes from device. for fail safe, it may gives up auto when status changes by outside,
  * @return true if ringManager gives up auto
  */
-	public boolean confirmStatusChangeFromOutside(STATUS status){
-		if(resetauto && auto && get()!=status){
-			auto=false;
-			set(status);
-			return true;
+	synchronized public STATUS confirm(STATUS status){
+		set(status);
+		if(auto){
+			if(resetauto && get()!=status){
+				auto=false;
+				return status;
+			}else{
+				return STATUS.auto;
+			}
+		}else{
+			return status;
 		}
-		return false;
 	}
 
 	static STATUS convParam2Status(int device_status){
@@ -201,7 +206,7 @@ public class RingManager implements OnLocationCollectedListener{
 	@Override
 	public void onFinishLocationCollection(Location location, RESULT result) {
 		if(result==RESULT.resultOK){
-			resolveStatus(null, set(pickStatus(locationsetting.getStatus(location), schedulesetting.getStatus())));
+			resolveStatus(null, pickStatus(locationsetting.getStatus(location), schedulesetting.getStatus()));
 		}
 	}
 
@@ -210,14 +215,14 @@ public class RingManager implements OnLocationCollectedListener{
 	}
 
 	public void setStatus(Context context, STATUS status){
-		set(status);
 		if(status==STATUS.auto){
 			auto=true;
-			StatusRefreshReciever.Start(context, getRepeatTime());
+			set(STATUS.auto);
+			AutoReceiver.Start(context, getRepeatTime());
 		}else{
-			StatusRefreshReciever.Stop(context);
 			auto=false;
-			resolveStatus(context, get());
+			AutoReceiver.Stop(context);
+			resolveStatus(context, status);
 		}
 	}
 
@@ -226,7 +231,7 @@ public class RingManager implements OnLocationCollectedListener{
 			if(locationsetting.getEnable()){
 				new LocationHelper(context).start(false, fineness, this);
 			}else{
-				resolveStatus(context, set(pickStatus(STATUS.uncontrol, schedulesetting.getStatus())));
+				resolveStatus(context, pickStatus(STATUS.uncontrol, schedulesetting.getStatus()));
 			}
 		}
 	}
@@ -246,8 +251,10 @@ public class RingManager implements OnLocationCollectedListener{
 			if(get()!=status){
 				set(status);
 				sendNotification(context, get());
-				audiomanager.setRingerMode(convStatus2Param(get()));
+				audiomanager.setRingerMode(convStatus2Param(status));
 			}
+		default:
+			throw new RuntimeException();
 		}
 	}
 

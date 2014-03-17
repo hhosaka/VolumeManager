@@ -23,8 +23,8 @@ public class RotationButton<T> extends Button implements OnClickListener {
 		setOnClickListener(this);
 	}
 
-	public void add(String lable,T value){//TODO
-		labels.add(new PrimitiveLabel<T>(value));
+	public void add(PrimitiveLabel<T> label){
+		labels.add(label);
 	}
 
 	public void setOnValueChangedListener(OnValueChangedListener<T> listener){
@@ -36,10 +36,10 @@ public class RotationButton<T> extends Button implements OnClickListener {
 	}
 
 	public void setValue(T value){
-		for(PrimitiveLabel<T> label:labels)
-		{
-			if(label.getValue()==value){
-				setText(label.toString());
+		for(int i=0; i<labels.size(); ++i){
+			if(labels.get(i).getValue()==value){
+				index=i;
+				setText(labels.get(i).toString());
 				return;
 			}
 		}

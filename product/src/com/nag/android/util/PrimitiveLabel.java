@@ -12,6 +12,9 @@ public class PrimitiveLabel<T>{
 	public boolean equals(Object obj){
 		return obj==this || obj==value;
 	}
+	public boolean isEnable(){
+		return true;
+	}
 	public String toString(){
 		return value.toString();
 	}

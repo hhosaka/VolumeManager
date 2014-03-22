@@ -3,13 +3,63 @@ package com.nag.android.ringmanager;
 import java.util.Calendar;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.nag.android.ringmanager.RingManager.STATUS;
 import com.nag.android.util.PreferenceHelper;
 
 public class ScheduleSetting {
+	public interface Day{
+		public STATUS get(int hour);
+		public void set(int hour, STATUS status);
+		public int size();
+		public STATUS getResolvedStatus(int hour);
+	}
+
+	public class WeekDay implements Day{
+		private int day;
+		WeekDay(int day){
+			this.day=day;
+		}
+		public STATUS get(int hour){return schedules[day][hour];}
+		public void set(int hour, STATUS status){schedules[day][hour]=status;}
+		public int size(){return HOUR_OF_A_DAY;}
+		public STATUS getResolvedStatus(int hour){
+			return ScheduleSetting.this.resolveStatus(day, hour);
+		}
+	}
+
+	public class EveryDay implements Day{
+		public STATUS get(int hour){
+			Log.d("H:","H:"+hour);
+			STATUS ret=schedules[0][hour];
+			for(int i=1;i<DAY_OF_A_WEEK;++i){
+				if(ret!=schedules[i][hour]){
+					return STATUS.na;
+				}
+			}
+			return ret;
+		}
+		public void set(int hour, STATUS status){
+			for(int i=1;i<DAY_OF_A_WEEK;++i){
+				schedules[i][hour]=status;
+			}
+		}
+
+		public STATUS getResolvedStatus(int hour){
+			for(int i=0;i<HOUR_OF_A_DAY;++i){
+				STATUS status=get((HOUR_OF_A_DAY+hour+i)%HOUR_OF_A_DAY);
+				if(status!=STATUS.follow&&status!=STATUS.na){
+					return status;
+				}
+			}
+			return STATUS.follow;
+		}
+		public int size(){return DAY_OF_A_WEEK;}
+	}
+
 	static final int HOUR_OF_A_DAY=24;
-	static final int EVERYDAY=-1;
+	static final int EVERYDAY=7;
 	private static final int DAY_OF_A_WEEK=7;
 	private final String PREF_SCHEDULE = "schedule_";
 	private final String PREF_SCHEDULE_ENABLE = "schedule_enable";
@@ -44,7 +94,7 @@ public class ScheduleSetting {
 
 	public STATUS getStatus(){
 		if(enable){
-			return resolveStatus(Calendar.getInstance().get(Calendar.DAY_OF_WEEK), Calendar.getInstance().get(Calendar.HOUR));
+			return resolveStatus(Calendar.getInstance().get(Calendar.DAY_OF_WEEK), Calendar.getInstance().get(Calendar.HOUR_OF_DAY));
 		}else{
 			return STATUS.uncontrol;
 		}
@@ -79,35 +129,12 @@ public class ScheduleSetting {
 		saveSetting();
 	}
 
-	public STATUS[] cloneSchedule(int day){
+	public Day getSchedule(int day){
 		if(day==EVERYDAY){
-			return cloneScheduleEveryDay();
+			return new EveryDay();
 		}else{
-			return schedules[day].clone();
+			return new WeekDay(day);
 		}
-	}
-
-	private STATUS[] cloneScheduleEveryDay(){
-		STATUS[]ret=
-		{STATUS.na,STATUS.na,STATUS.na,STATUS.na,STATUS.na,STATUS.na,
-			STATUS.na,STATUS.na,STATUS.na,STATUS.na,STATUS.na,STATUS.na,
-			STATUS.na,STATUS.na,STATUS.na,STATUS.na,STATUS.na,STATUS.na,
-			STATUS.na,STATUS.na,STATUS.na,STATUS.na,STATUS.na,STATUS.na};
-//		STATUS[]ret=new STATUS[24];
-//		for(STATUS status:ret){
-//			status=STATUS.na;
-//		}
-		for(int i=0;i<HOUR_OF_A_DAY;++i){
-			for(int j=0;j<DAY_OF_A_WEEK;++j){
-				if(ret[i]==STATUS.na){
-					ret[i]=schedules[j][i];
-				}else if(ret[i]!=schedules[j][i]){
-					ret[i]=STATUS.na;
-					break;
-				}
-			}
-		}
-		return ret;
 	}
 
 	private void loadSetting(){

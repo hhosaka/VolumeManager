@@ -30,7 +30,9 @@ public class MainActivity extends Activity{
 	class StatusMonitor extends BroadcastReceiver{
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			if (intent.getAction().equals(AudioManager.RINGER_MODE_CHANGED_ACTION)) {
+			if (intent.getAction().equals(RingManager.RING_MANAGER_STATUS_CHANGED)){
+				btnStatus.setValue(ringmanager.getStatus());
+			}else if (intent.getAction().equals(AudioManager.RINGER_MODE_CHANGED_ACTION)) {
 				STATUS status=RingManager.convParam2Status(intent.getIntExtra(AudioManager.EXTRA_RINGER_MODE, -1));
 				btnStatus.setValue(ringmanager.confirm(status));
 			}
@@ -49,6 +51,7 @@ public class MainActivity extends Activity{
 		ringmanager.doAuto(this);
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
+		filter.addAction(RingManager.RING_MANAGER_STATUS_CHANGED);
 		registerReceiver(statusmonitor=new StatusMonitor(),filter);
 	}
 
@@ -62,6 +65,11 @@ public class MainActivity extends Activity{
 		}
 	}
 
+	@Override
+	protected void onResume(){
+		super.onResume();
+		ringmanager.doAuto(this);
+	}
 	class AutoLabel extends Label<STATUS>
 	{
 		public AutoLabel(String label, STATUS value) {
@@ -98,6 +106,7 @@ public class MainActivity extends Activity{
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
 				ringmanager.setEnableLocation(isChecked);
+				ringmanager.doAuto(MainActivity.this);
 			}
 		});
 		findViewById(R.id.buttonByLocationSetting).setOnClickListener(new OnClickListener() {
@@ -115,11 +124,14 @@ public class MainActivity extends Activity{
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
 				ringmanager.setEnableSchedule(isChecked);
+				ringmanager.doAuto(MainActivity.this);
 			}
 		});
 		findViewById(R.id.buttonByScheduleSetting).setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
+//				startActivity(new Intent(MainActivity.this,ScheduleSettingActivity.class));
+				ScheduleSettingActivity.showProgressDialog(MainActivity.this);
 				startActivity(new Intent(MainActivity.this,ScheduleSettingActivity.class));
 			}
 		});

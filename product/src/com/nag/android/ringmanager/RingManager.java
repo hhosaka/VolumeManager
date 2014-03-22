@@ -13,12 +13,14 @@ import android.location.Location;
 import android.media.AudioManager;
 
 public class RingManager implements OnLocationCollectedListener{
-	private final String PREF_RING_MANAGER = "pref_ring_manager_";
-	private final String PREF_AUTO = "auto";
+	private static final int MAX_COUNT = 10;
+	private static final String PREF_RING_MANAGER = "pref_ring_manager_";
+	private static final String PREF_AUTO = "auto";
 //	private final String PREF_STATUS = "status";
-	private final String PREF_FREQUENCY = "frequency";
-	private final String PREF_PRIORITY = "priority";
-	private final String PREF_FINENESS = "fineness";
+	private static final String PREF_FREQUENCY = "frequency";
+	private static final String PREF_PRIORITY = "priority";
+	private static final String PREF_MAX_ACCURACY = "fineness";
+	public static final String RING_MANAGER_STATUS_CHANGED="ring manager status changed";
 
 	private final PreferenceHelper pref;
 	private final AudioManager audiomanager;
@@ -29,10 +31,11 @@ public class RingManager implements OnLocationCollectedListener{
 	private final LocationSetting locationsetting;
 	private final ScheduleSetting schedulesetting;
 	private PRIORITY priority=PRIORITY.schedulefirst;
+	private Context context;
 	private int frequency=1;
 	private STATUS status=null;
 //	private STATUS sub_status=null;
-	private double fineness=0.0;
+	private double max_accuracy=1500.0;
 	private boolean auto;
 	private boolean resetauto;
 
@@ -51,8 +54,20 @@ public class RingManager implements OnLocationCollectedListener{
 		return instance;
 	}
 
+	private RingManager(Context context, PreferenceHelper pref){
+		this(context, pref
+				,(AudioManager)context.getSystemService(Context.AUDIO_SERVICE)
+				, new LocationSetting(context, pref)
+				, new ScheduleSetting(context, pref));
+	}
+
+	public PRIORITY getPriority(){
+		return priority;
+	}
+
 	//for debug
-	public RingManager(PreferenceHelper pref, AudioManager audiomanager, LocationSetting locationsetting, ScheduleSetting schedulesetting){
+	public RingManager(Context context, PreferenceHelper pref, AudioManager audiomanager, LocationSetting locationsetting, ScheduleSetting schedulesetting){
+		this.context=context;
 		this.pref=pref;
 		this.audiomanager=audiomanager;
 		this.locationsetting=locationsetting;
@@ -65,25 +80,14 @@ public class RingManager implements OnLocationCollectedListener{
 		set(this.getDeviceStatus());
 		this.frequency=pref.getInt(PREF_RING_MANAGER+PREF_FREQUENCY, 1);// TODO test
 		this.priority=PRIORITY.valueOf(pref.getString(PREF_RING_MANAGER+PREF_PRIORITY, PRIORITY.silentfirst.toString()));
-		this.fineness=pref.getDouble(PREF_RING_MANAGER+PREF_FINENESS, 0.5);
+		this.max_accuracy=pref.getDouble(PREF_RING_MANAGER+PREF_MAX_ACCURACY, 1500.0);
 	}
 
 	private void save(){
 		pref.putBoolean(PREF_AUTO, auto);
 		pref.putInt(PREF_RING_MANAGER+PREF_FREQUENCY, frequency);
 		pref.putString(PREF_RING_MANAGER+PREF_PRIORITY, priority.toString());
-		pref.putDouble(PREF_RING_MANAGER+PREF_FINENESS, fineness);
-	}
-
-	private RingManager(Context context, PreferenceHelper pref){
-		this(pref
-				,(AudioManager)context.getSystemService(Context.AUDIO_SERVICE)
-				, new LocationSetting(context, pref)
-				, new ScheduleSetting(context, pref));
-	}
-
-	public PRIORITY getPriority(){
-		return priority;
+		pref.putDouble(PREF_RING_MANAGER+PREF_MAX_ACCURACY, max_accuracy);
 	}
 
 	public boolean isAuto(){
@@ -131,12 +135,12 @@ public class RingManager implements OnLocationCollectedListener{
 		save();
 	}
 
-	public double getFineness(){
-		return fineness;
+	public double getMaxAccuracy(){
+		return max_accuracy;
 	}
 
-	public void setFineness(double fineness){
-		this.fineness=fineness;
+	public void setMaxAccuracy(double max_accuracy){
+		this.max_accuracy=max_accuracy;
 		save();
 	}
 
@@ -206,7 +210,7 @@ public class RingManager implements OnLocationCollectedListener{
 	@Override
 	public void onFinishLocationCollection(Location location, RESULT result) {
 		if(result==RESULT.resultOK){
-			resolveStatus(null, pickStatus(locationsetting.getStatus(location), schedulesetting.getStatus()));
+			resolveStatus(context, pickStatus(locationsetting.getStatus(location), schedulesetting.getStatus()));
 		}
 	}
 
@@ -229,7 +233,7 @@ public class RingManager implements OnLocationCollectedListener{
 	void doAuto(Context context){//TODO lock
 		if(isAuto()){
 			if(locationsetting.getEnable()){
-				new LocationHelper(context).start(false, fineness, this);
+				new LocationHelper(context).start(false, max_accuracy, MAX_COUNT, this);
 			}else{
 				resolveStatus(context, pickStatus(STATUS.uncontrol, schedulesetting.getStatus()));
 			}
@@ -252,7 +256,10 @@ public class RingManager implements OnLocationCollectedListener{
 				set(status);
 				sendNotification(context, get());
 				audiomanager.setRingerMode(convStatus2Param(status));
+			}else{
+				context.sendBroadcast(new Intent(RING_MANAGER_STATUS_CHANGED));
 			}
+			break;
 		default:
 			throw new RuntimeException();
 		}

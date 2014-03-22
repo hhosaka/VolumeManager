@@ -23,4 +23,12 @@
     <string name="label_delete">Delete</string>
     <string name="label_location">Location</string>
     <string name="label_schedule">Schedule</string>
+    <string name="label_day_sunday">Sunday</string>
+    <string name="label_day_monday">Monday</string>
+    <string name="label_day_tueday">Tueday</string>
+    <string name="label_day_wednesday">Wednesday</string>
+    <string name="label_day_thursday">Thursday</string>
+    <string name="label_day_friday">Friday</string>
+    <string name="label_day_satueday">Saturday</string>
+    <string name="label_day_everyday">Everyday</string>
 </resources>

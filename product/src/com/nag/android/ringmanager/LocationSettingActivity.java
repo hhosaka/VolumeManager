@@ -2,6 +2,7 @@ package com.nag.android.ringmanager;
 
 import java.util.Calendar;
 
+import com.nag.android.ringmanager.LocationData.TYPE;
 import com.nag.android.ringmanager.LocationHelper.OnLocationCollectedListener;
 import com.nag.android.ringmanager.RingManager.STATUS;
 import com.nag.android.ringmanager.R;
@@ -10,6 +11,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.text.format.DateFormat;
@@ -23,8 +25,9 @@ import android.widget.ListView;
 
 public class LocationSettingActivity extends Activity implements OnLocationCollectedListener,  AdapterView.OnItemClickListener{
 
+	private static final int MAX_COUNT=10;
 	private static final int REQUEST_CODE=0x1234;
-	private static final double fineness=1.0;//TODO tentative
+	private static final double max_accuracy=25.0;//TODO tentative
 	private LocationSetting locationsetting=null;
 	private ArrayAdapter<LocationData> adapter;
 
@@ -38,19 +41,51 @@ public class LocationSettingActivity extends Activity implements OnLocationColle
 		initAddButton();
 		initListView();
 	}
-
+	LocationHelper locationhelper=null;
+	ProgressDialog dlg=null;
 	private void initAddButton() {
 		findViewById(R.id.ButtonAdd).setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v){
 				if(locationsetting.hasSpace()){
 //					LocationCollector.getInstance(getApplicationContext()).start(LocationSettingActivity.this);
-					new LocationHelper(getApplicationContext()).start(true, fineness, LocationSettingActivity.this);
+					ProgressDialog dlg=new ProgressDialog(LocationSettingActivity.this);
+					dlg.setTitle("Searching...");
+					dlg.setMessage("Please wait for finish searching");
+					dlg.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+					dlg.setButton(DialogInterface.BUTTON_POSITIVE, "Quit",
+							new DialogInterface.OnClickListener() {
+							@Override
+								public void onClick(DialogInterface dialog, int which) {
+									if(locationhelper!=null){
+										locationhelper.stop();
+										locationhelper=null;
+									}
+									if(LocationSettingActivity.this.dlg!=null){
+										LocationSettingActivity.this.dlg.dismiss();
+										LocationSettingActivity.this.dlg=null;
+									}
+								}
+							});
+					dlg.setCancelable(false);
+					dlg.show();
+
+					locationhelper=new LocationHelper(getApplicationContext());
+					locationhelper.start(true, max_accuracy, MAX_COUNT, LocationSettingActivity.this);
 				}else{
 					//TODO
 				}
 			}
 		});
+	}
+
+	@Override
+	public void onFinishLocationCollection(Location location, RESULT result) {
+		if(dlg!=null){
+			dlg.dismiss();
+			dlg=null;
+		}
+		edit(locationsetting.addCurrentLocation(this, DateFormat.format("yyyy/MM/dd kk:mm:ss", Calendar.getInstance()).toString(), location));
 	}
 
 	private void initListView(){
@@ -80,6 +115,8 @@ public class LocationSettingActivity extends Activity implements OnLocationColle
 					}
 				})
 				.create().show();
+		}else if(locationsetting.getLocationData().get(position).getType()==TYPE.typeDefault){
+			edit(position);
 		}
 	}
 
@@ -97,17 +134,11 @@ public class LocationSettingActivity extends Activity implements OnLocationColle
 		super.onActivityResult(requestCode, resultCode, data);
 		if(requestCode==REQUEST_CODE && resultCode==RESULT_OK){
 			int index=data.getIntExtra(EditLocationSettingsActivity.PARAM_INDEX, 0);
-			assert(index>0);
 			locationsetting.edit(this, index,
 					data.getStringExtra(EditLocationSettingsActivity.PARAM_TITLE),
 					STATUS.valueOf(data.getStringExtra(EditLocationSettingsActivity.PARAM_STATUS)));
 			adapter.notifyDataSetChanged();// TODO is it enough?
 		}
-	}
-
-	@Override
-	public void onFinishLocationCollection(Location location, RESULT result) {
-		edit(locationsetting.addCurrentLocation(this, DateFormat.format("yyyy/MM/dd kk:mm:ss", Calendar.getInstance()).toString(), location));
 	}
 
 	@Override

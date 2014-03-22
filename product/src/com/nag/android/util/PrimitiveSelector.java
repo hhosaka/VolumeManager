@@ -7,6 +7,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Filter;
 import android.widget.Spinner;
 
 public class PrimitiveSelector<T> extends Spinner {
@@ -22,7 +23,7 @@ public class PrimitiveSelector<T> extends Spinner {
 
 	public PrimitiveSelector(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		adapter=new ArrayAdapter<PrimitiveLabel<T>>(context, android.R.layout.simple_spinner_dropdown_item, labels);
+		adapter=new InternalAdapter(context, labels);
 		setAdapter(adapter);
 		setOnItemSelectedListener(new OnItemSelectedListener() { 
 			@Override
@@ -61,5 +62,32 @@ public class PrimitiveSelector<T> extends Spinner {
 
 	public void setOnSelectedListener(OnSelectedListener<T> listener){
 		this.listener=listener;
+	}
+	
+	class CustomFilter extends Filter
+	{
+		@Override
+		protected FilterResults performFiltering(CharSequence arg0) {
+			return null;
+		}
+
+		@Override
+		protected void publishResults(CharSequence arg0, FilterResults arg1) {
+		}
+		
+	}
+
+	class InternalAdapter extends ArrayAdapter<PrimitiveLabel<T>>{
+		InternalAdapter(Context context, ArrayList<PrimitiveLabel<T>> labels){
+			super(context, android.R.layout.simple_spinner_dropdown_item, labels);
+		}
+		@Override
+		public Filter getFilter(){
+			return new CustomFilter();
+		}
+		@Override
+		public boolean isEnabled(int position){
+			return labels.get(position).isEnable();
+		}
 	}
 }

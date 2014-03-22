@@ -13,13 +13,10 @@ import android.os.Bundle;
  *Do not recycle this class
  */
 public class LocationHelper implements LocationListener{
-	private static final double LIMIT_ACCURACY_4_GPS=20.0;// TODO tentative
-	private static final double LIMIT_ACCURACY_4_NET=1000.0;// TODO tentative
-	private static final int MAX_RETRY_COUNT=10;// TODO tentative
 	private final LocationManager manager;
 	private OnLocationCollectedListener listener=null;
-	private int retry;
-	private double limit_accuracy=0.0;
+	private int max_count;
+	private double limit_accuracy=1000.0;
 
 	public interface OnLocationCollectedListener{
 		public enum RESULT{resultOK,resultRetryError,resultDisabled};
@@ -30,29 +27,32 @@ public class LocationHelper implements LocationListener{
 		manager=(LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
 	}
 
-	synchronized public boolean start(boolean isGPSRequired, double fineness, OnLocationCollectedListener listener){
+	synchronized public boolean start(boolean isGPSRequired, double limit_accuracy, int max_count, OnLocationCollectedListener listener){
 		assert(listener==null);
-		retry=0;
+		this.max_count=max_count;
 		this.listener=listener;
-		if (!startByGPS(fineness, listener) && !isGPSRequired){
-			return startByNet(fineness, listener);
+		this.limit_accuracy=limit_accuracy;
+		if (!startByGPS(listener) && !isGPSRequired){
+			return startByNet(listener);
 		}
 		return false;
 	}
 
-	private boolean startByGPS(double fineness, OnLocationCollectedListener listener){
+	public void stop(){
+		manager.removeUpdates(this);
+	}
+
+	private boolean startByGPS(OnLocationCollectedListener listener){
 		if (manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
 			manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-			limit_accuracy=LIMIT_ACCURACY_4_GPS / fineness;
 			return true;
 		}
 		return false;
 	}
 
-	private boolean startByNet(double fineness, OnLocationCollectedListener listener){
+	private boolean startByNet(OnLocationCollectedListener listener){
 		if(manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
 			manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
-			limit_accuracy=LIMIT_ACCURACY_4_NET / fineness;
 			return true;
 		}
 		return false;
@@ -65,7 +65,7 @@ public class LocationHelper implements LocationListener{
 			manager.removeUpdates(this);
 			if(listener!=null)listener.onFinishLocationCollection(location,RESULT.resultOK);
 		}else{
-			if(++retry>MAX_RETRY_COUNT){
+			if(--max_count>0){
 				if(listener!=null)listener.onFinishLocationCollection(location,RESULT.resultRetryError);
 				manager.removeUpdates(this);
 			}

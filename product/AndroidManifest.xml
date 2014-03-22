@@ -34,6 +34,10 @@
             android:label="@string/title_activity_location_setting" >
         </activity>
         <activity
+            android:name="com.nag.android.ringmanager.ScheduleSettingActivity"
+            android:label="@string/title_activity_location_setting" >
+        </activity>
+        <activity
             android:name="com.nag.android.ringmanager.EditLocationSettingsActivity">
         </activity>
         <activity

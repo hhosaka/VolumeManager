@@ -1,8 +1,11 @@
 package com.nag.android.ringmanager;
 
+import com.nag.android.ringmanager.RingManager.PRIORITY;
 import com.nag.android.ringmanager.RingManager.STATUS;
+import com.nag.android.ringmanager.controls.PrioritySelector;
 import com.nag.android.ringmanager.controls.StatusRotationButton;
 import com.nag.android.util.Label;
+import com.nag.android.util.PrimitiveSelector.OnSelectedListener;
 import com.nag.android.util.RotationButton.OnValueChangedListener;
 import com.nag.android.ringmanager.R;
 
@@ -16,6 +19,7 @@ import android.content.IntentFilter;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -42,12 +46,15 @@ public class MainActivity extends Activity{
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_main);
 
 		ringmanager=RingManager.getInstance(this);
 		initStatusButton();
 		initScheduleButtons();
 		initLocationButtons();
+		initPriorityButton();
+		setEnableSubControl();
 		ringmanager.doAuto(this);
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
@@ -137,6 +144,32 @@ public class MainActivity extends Activity{
 		});
 	}
 
+	private MainActivity getActivity(){
+		return this;
+	}
+
+	private void initPriorityButton(){
+		PrioritySelector sp=((PrioritySelector)findViewById(R.id.buttonPriority));
+		sp.add(new Label<PRIORITY>(getString(R.string.label_locationfirst),PRIORITY.locationfirst));
+		sp.add(new Label<PRIORITY>(getString(R.string.label_schedulefirst),PRIORITY.schedulefirst));
+		sp.add(new Label<PRIORITY>(getString(R.string.label_ringfirst),PRIORITY.ringfirst));
+		sp.add(new Label<PRIORITY>(getString(R.string.label_silentfirst),PRIORITY.silentfirst));
+		sp.setPriority(ringmanager.getPriority());
+		sp.setOnSelectedListener(new OnSelectedListener<PRIORITY>(){
+			@Override
+			public void OnSelected(View parent, PRIORITY priority) {
+				ringmanager.setPriority(getActivity(),(PRIORITY)priority);
+			}
+		});
+	}
+	
+	private void setEnableSubControl(){
+		boolean value=ringmanager.isAuto();
+		findViewById(R.id.buttonPriority).setEnabled(value);
+		findViewById(R.id.buttonByLocation).setEnabled(value);
+		findViewById(R.id.buttonBySchedule).setEnabled(value);
+	}
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.main, menu);
@@ -152,9 +185,8 @@ public class MainActivity extends Activity{
 			intent.putExtra(WebViewActivity.PARAM_MODE, WebViewActivity.MODE_HELP);
 			startActivity(intent);
 			return true;
-		case R.id.action_set_frequency:
-			return true;
-		case R.id.action_set_priority:
+		case R.id.action_open_setting:
+			startActivity(new Intent(this,SettingActivity.class));
 			return true;
 		}
 		return false;

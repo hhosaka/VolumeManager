@@ -22,8 +22,9 @@
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
-                </intent-filter>
+            </intent-filter>
         </activity>
         <activity
             android:name="com.nag.android.ringmanager.LocationSettingActivity"
@@ -37,13 +38,21 @@
             android:name="com.nag.android.ringmanager.ScheduleSettingActivity"
             android:label="@string/title_activity_location_setting" >
         </activity>
+        <activity android:name="com.nag.android.ringmanager.EditLocationSettingsActivity" >
+        </activity>
+        <activity android:name="com.nag.android.ringmanager.WebViewActivity" >
+        </activity>
+
+        <receiver android:name="com.nag.android.ringmanager.AutoReceiver" />
+
         <activity
-            android:name="com.nag.android.ringmanager.EditLocationSettingsActivity">
+            android:name="com.nag.android.ringmanager.SettingActivity2"
+            android:label="@string/title_activity_setting" >
         </activity>
         <activity
-            android:name="com.nag.android.ringmanager.WebViewActivity">
+            android:name="com.nag.android.ringmanager.SettingActivity"
+            android:label="@string/title_activity_setting" >
         </activity>
-        <receiver android:name="com.nag.android.ringmanager.AutoReceiver"/>
-        </application>
+    </application>
 
 </manifest>

@@ -24,12 +24,14 @@ public class LocationSetting{
 	private static final double MAX_LOCATION=32;
 	private static final String PREF_LOCATION="location_";
 	private static final String PREF_LOCATION_ENABLE="location_enable";
+	private static final String PREF_LOCATION_MAX_AREA="location_max_area";
 
 
 	private final ArrayList<LocationData> locations=new ArrayList<LocationData>();
 	private final PreferenceHelper pref;
 	private final LocationData locationDefault;
 	private boolean enable=true;
+	private double max_area;
 
 	public LocationSetting(Context context, PreferenceHelper pref){
 		this.pref=pref;
@@ -45,6 +47,14 @@ public class LocationSetting{
 	public void setEnable(boolean value){
 		enable=value;
 		saveSetting();
+	}
+
+	public double getMaxArea(){
+		return max_area;
+	}
+
+	public void setMaxArea(double max_area){
+		this.max_area=max_area;
 	}
 
 	public boolean hasSpace(){
@@ -92,10 +102,12 @@ public class LocationSetting{
 
 	private void loadSetting(){
 		enable=pref.getBoolean(PREF_LOCATION_ENABLE,true);
+		max_area=pref.getDouble(PREF_LOCATION_MAX_AREA,20.0);
 	}
 
 	private void saveSetting(){
 		pref.putBoolean(PREF_LOCATION_ENABLE,enable);
+		pref.putDouble(PREF_LOCATION_MAX_AREA,max_area);
 	}
 
 	private LocationData loadData(Context context, int index){

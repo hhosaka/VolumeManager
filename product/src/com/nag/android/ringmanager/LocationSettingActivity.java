@@ -27,7 +27,7 @@ public class LocationSettingActivity extends Activity implements OnLocationColle
 
 	private static final int MAX_COUNT=10;
 	private static final int REQUEST_CODE=0x1234;
-	private static final double max_accuracy=25.0;//TODO tentative
+//	private static final double max_accuracy=25.0;//TODO tentative
 	private LocationSetting locationsetting=null;
 	private ArrayAdapter<LocationData> adapter;
 
@@ -71,7 +71,7 @@ public class LocationSettingActivity extends Activity implements OnLocationColle
 					dlg.show();
 
 					locationhelper=new LocationHelper(getApplicationContext());
-					locationhelper.start(true, max_accuracy, MAX_COUNT, LocationSettingActivity.this);
+					locationhelper.start(true, locationsetting.getMaxArea(), MAX_COUNT, LocationSettingActivity.this);
 				}else{
 					//TODO
 				}

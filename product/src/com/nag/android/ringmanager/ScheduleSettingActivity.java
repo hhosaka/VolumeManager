@@ -120,7 +120,6 @@ public class ScheduleSettingActivity extends FragmentActivity {
 		public DummySectionFragment(){
 		}
 
-		
 		public void setArguments(Bundle args){
 			this.day=args.getInt(ARG_DAY);
 		}

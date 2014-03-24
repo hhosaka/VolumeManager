@@ -126,7 +126,7 @@ public class RingManager implements OnLocationCollectedListener{
 		return schedulesetting;
 	}
 
-	public int getfrequentry(){
+	public int getfrequency(){
 		return frequency;
 	}
 

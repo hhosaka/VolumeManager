@@ -110,9 +110,9 @@ public class RingManagerTest extends InstrumentationTestCase{
 
 	public void testGetfrequency() {
 		instance.setFrequency(1);
-		assertEquals(instance.getfrequentry(),1);
+		assertEquals(instance.getfrequency(),1);
 		instance.setFrequency(10);
-		assertEquals(instance.getfrequentry(),10);
+		assertEquals(instance.getfrequency(),10);
 	}
 
 	STATUS invokeDoAuto(Context context){

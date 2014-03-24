@@ -39,7 +39,7 @@ public class EditLocationSettingsActivity extends Activity{
 				Intent intent =new Intent();
 				intent.putExtra(PARAM_INDEX,index);
 				intent.putExtra(PARAM_TITLE,((EditText) findViewById(R.id.textLocationName)).getText().toString());
-				intent.putExtra(PARAM_STATUS,((StatusSelector)findViewById(R.id.buttonStatus)).getStatus().toString());
+				intent.putExtra(PARAM_STATUS,((StatusSelector)findViewById(R.id.buttonStatus)).getValue().toString());
 				setResult(RESULT_OK, intent);
 				finish();
 			}

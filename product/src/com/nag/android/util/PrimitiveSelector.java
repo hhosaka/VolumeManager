@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
@@ -51,12 +52,12 @@ public class PrimitiveSelector<T> extends Spinner {
 		throw new RuntimeException();
 	}
 
-	public void setStatus(T status){
-		setSelection(getIndex(status));
+	public void setValue(T value){
+		setSelection(getIndex(value));
 		adapter.notifyDataSetChanged();// is it safety??
 	}
 
-	public T getStatus(){
+	public T getValue(){
 		return labels.get(getSelectedItemPosition()).getValue();
 	}
 
@@ -64,26 +65,38 @@ public class PrimitiveSelector<T> extends Spinner {
 		this.listener=listener;
 	}
 	
-	class CustomFilter extends Filter
-	{
-		@Override
-		protected FilterResults performFiltering(CharSequence arg0) {
-			return null;
-		}
-
-		@Override
-		protected void publishResults(CharSequence arg0, FilterResults arg1) {
-		}
-		
-	}
+//	class CustomFilter extends Filter
+//	{
+//		@Override
+//		protected FilterResults performFiltering(CharSequence arg0) {
+//			return null;
+//		}
+//
+//		@Override
+//		protected void publishResults(CharSequence arg0, FilterResults arg1) {
+//		}
+//		
+//	}
 
 	class InternalAdapter extends ArrayAdapter<PrimitiveLabel<T>>{
 		InternalAdapter(Context context, ArrayList<PrimitiveLabel<T>> labels){
 			super(context, android.R.layout.simple_spinner_dropdown_item, labels);
 		}
+//		@Override
+//		public Filter getFilter(){
+//			return new CustomFilter();
+//		}
 		@Override
-		public Filter getFilter(){
-			return new CustomFilter();
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View view=super.getView(position, convertView, parent);
+			if(view!=null){
+				if(!labels.get(position).isEnable()){
+					view.setVisibility(View.GONE);
+				}else{
+					view.setVisibility(View.VISIBLE);
+				}
+			}
+			return view;
 		}
 		@Override
 		public boolean isEnabled(int position){

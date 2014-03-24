@@ -31,7 +31,7 @@ public class ScheduleSetting {
 
 	public class EveryDay implements Day{
 		public STATUS get(int hour){
-			Log.d("H:","H:"+hour);
+//			Log.d("H:","H:"+hour);
 			STATUS ret=schedules[0][hour];
 			for(int i=1;i<DAY_OF_A_WEEK;++i){
 				if(ret!=schedules[i][hour]){

@@ -30,6 +30,8 @@ public class LocationSettingActivity extends Activity implements OnLocationColle
 //	private static final double max_accuracy=25.0;//TODO tentative
 	private LocationSetting locationsetting=null;
 	private ArrayAdapter<LocationData> adapter;
+	private LocationHelper locationhelper=null;
+	private ProgressDialog progress_dialog=null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -41,8 +43,11 @@ public class LocationSettingActivity extends Activity implements OnLocationColle
 		initAddButton();
 		initListView();
 	}
-	LocationHelper locationhelper=null;
-	ProgressDialog dlg=null;
+
+	LocationSettingActivity getActivity(){
+		return this;
+	}
+
 	private void initAddButton() {
 		findViewById(R.id.ButtonAdd).setOnClickListener(new OnClickListener(){
 			@Override
@@ -61,9 +66,9 @@ public class LocationSettingActivity extends Activity implements OnLocationColle
 										locationhelper.stop();
 										locationhelper=null;
 									}
-									if(LocationSettingActivity.this.dlg!=null){
-										LocationSettingActivity.this.dlg.dismiss();
-										LocationSettingActivity.this.dlg=null;
+									if(LocationSettingActivity.this.progress_dialog!=null){
+										LocationSettingActivity.this.progress_dialog.dismiss();
+										LocationSettingActivity.this.progress_dialog=null;
 									}
 								}
 							});
@@ -71,7 +76,7 @@ public class LocationSettingActivity extends Activity implements OnLocationColle
 					dlg.show();
 
 					locationhelper=new LocationHelper(getApplicationContext());
-					locationhelper.start(true, locationsetting.getMaxArea(), MAX_COUNT, LocationSettingActivity.this);
+					locationhelper.start(true, RingManager.getInstance(getActivity()).getMaxArea4Entry(), MAX_COUNT, LocationSettingActivity.this);
 				}else{
 					//TODO
 				}
@@ -81,9 +86,9 @@ public class LocationSettingActivity extends Activity implements OnLocationColle
 
 	@Override
 	public void onFinishLocationCollection(Location location, RESULT result) {
-		if(dlg!=null){
-			dlg.dismiss();
-			dlg=null;
+		if(progress_dialog!=null){
+			progress_dialog.dismiss();
+			progress_dialog=null;
 		}
 		edit(locationsetting.addCurrentLocation(this, DateFormat.format("yyyy/MM/dd kk:mm:ss", Calendar.getInstance()).toString(), location));
 	}

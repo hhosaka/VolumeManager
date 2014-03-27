@@ -60,12 +60,21 @@
 	            android:drawableRight="@android:drawable/ic_menu_preferences"
 	            android:gravity="center" />
 		</LinearLayout>
+
 	    <com.nag.android.ringmanager.controls.PrioritySelector
 	        android:id="@+id/buttonPriority"
 	        android:layout_width="fill_parent"
 	        android:layout_height="0dp"
-            android:layout_weight="1"
-			android:background="@drawable/btn_0002"
-        />
-	    	</LinearLayout>
+	        android:layout_gravity="center_vertical|center_horizontal"
+	        android:layout_weight="1"
+	        android:background="@drawable/btn_0002"
+	        android:gravity="center_vertical|center_horizontal" />
+
+    </LinearLayout>
+	<com.nag.android.ringmanager.controls.SmartTimerSelector
+		android:id="@+id/buttonSmartTimer"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:background="@drawable/btn_0002"
+		/>
 </LinearLayout>

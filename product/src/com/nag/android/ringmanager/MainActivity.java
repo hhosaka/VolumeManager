@@ -3,6 +3,7 @@ package com.nag.android.ringmanager;
 import com.nag.android.ringmanager.RingManager.PRIORITY;
 import com.nag.android.ringmanager.RingManager.STATUS;
 import com.nag.android.ringmanager.controls.PrioritySelector;
+import com.nag.android.ringmanager.controls.SmartTimerSelector;
 import com.nag.android.ringmanager.controls.StatusRotationButton;
 import com.nag.android.util.Label;
 import com.nag.android.util.PrimitiveSelector.OnSelectedListener;
@@ -54,6 +55,7 @@ public class MainActivity extends Activity{
 		initScheduleButtons();
 		initLocationButtons();
 		initPriorityButton();
+		initSmartTimerButton();
 		setEnableSubControl();
 		ringmanager.doAuto(this);
 		IntentFilter filter = new IntentFilter();
@@ -84,7 +86,7 @@ public class MainActivity extends Activity{
 		}
 		public String toString(){
 			if(ringmanager.isAuto()){
-				return "Auto(" + ringmanager.getStatus() +")";
+				return getString(R.string.label_auto)+"(" + ringmanager.getStatus() +")";
 			}else{
 				return super.toString();
 			}
@@ -163,6 +165,24 @@ public class MainActivity extends Activity{
 		});
 	}
 	
+	private void initSmartTimerButton(){
+		SmartTimerSelector sp=((SmartTimerSelector)findViewById(R.id.buttonSmartTimer));
+		sp.add(new Label<Integer>(getString(R.string.label_smart_timer_off),0));
+		sp.add(new Label<Integer>(getString(R.string.label_smart_timer_30m),30));
+		sp.add(new Label<Integer>(getString(R.string.label_smart_timer_1h),60));
+		sp.add(new Label<Integer>(getString(R.string.label_smart_timer_1_5h),90));
+		sp.add(new Label<Integer>(getString(R.string.label_smart_timer_2h),120));
+		sp.add(new Label<Integer>(getString(R.string.label_smart_timer_3h),180));
+		sp.add(new Label<Integer>(getString(R.string.label_smart_timer_4h),240));
+		sp.setTime(0);//TODO
+//		sp.setOnSelectedListener(new SmartTimerSelector.OnSelectedListener(){
+//			@Override
+//			public void OnSelected(View parent, Integer priority) {
+////				ringmanager.setPriority(getActivity(),(PRIORITY)priority);
+//			}
+//		});
+	}
+
 	private void setEnableSubControl(){
 		boolean value=ringmanager.isAuto();
 		findViewById(R.id.buttonPriority).setEnabled(value);

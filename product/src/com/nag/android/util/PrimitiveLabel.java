@@ -1,6 +1,6 @@
 package com.nag.android.util;
 
-public class PrimitiveLabel<T>{
+public class PrimitiveLabel<T> implements CharSequence {
 	private T value;
 	public PrimitiveLabel(T value){
 		this.value=value;
@@ -17,6 +17,20 @@ public class PrimitiveLabel<T>{
 	}
 	public String toString(){
 		return value.toString();
+	}
+	@Override
+	public char charAt(int index) {
+		return toString().charAt(index);
+	}
+
+	@Override
+	public int length() {
+		return toString().length();
+	}
+
+	@Override
+	public CharSequence subSequence(int start, int end) {
+		return toString().subSequence(start, end);
 	}
 }
 

@@ -19,9 +19,10 @@ public class SettingActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_setting);
 
-//		((EditText)findViewById(R.id.editAutoArea4Checking)).setText(String.valueOf(ringmanager.getCheckingArea()));
-		((EditText)findViewById(R.id.editArea4Entry)).setText(String.valueOf(ringmanager.getLocationSetting().getMaxArea()));
+		((EditText)findViewById(R.id.editAutoArea4Checking)).setText(String.valueOf(ringmanager.getMaxArea4Checking()));
+		((EditText)findViewById(R.id.editArea4Entry)).setText(String.valueOf(ringmanager.getMaxArea4Entry()));
 		((EditText)findViewById(R.id.editAutoFrequency)).setText(String.valueOf(ringmanager.getfrequency()));
+		// TODO reset auto
 	}
 
 	@Override

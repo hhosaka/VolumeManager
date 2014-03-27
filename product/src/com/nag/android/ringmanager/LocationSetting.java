@@ -31,7 +31,7 @@ public class LocationSetting{
 	private final PreferenceHelper pref;
 	private final LocationData locationDefault;
 	private boolean enable=true;
-	private double max_area;
+//	private double max_area;
 
 	public LocationSetting(Context context, PreferenceHelper pref){
 		this.pref=pref;
@@ -49,14 +49,14 @@ public class LocationSetting{
 		saveSetting();
 	}
 
-	public double getMaxArea(){
-		return max_area;
-	}
-
-	public void setMaxArea(double max_area){
-		this.max_area=max_area;
-	}
-
+//	public double getMaxArea(){
+//		return max_area;
+//	}
+//
+//	public void setMaxArea(double max_area){
+//		this.max_area=max_area;
+//	}
+//
 	public boolean hasSpace(){
 		return locations.size()<MAX_LOCATION;
 	}
@@ -102,12 +102,12 @@ public class LocationSetting{
 
 	private void loadSetting(){
 		enable=pref.getBoolean(PREF_LOCATION_ENABLE,true);
-		max_area=pref.getDouble(PREF_LOCATION_MAX_AREA,20.0);
+//		max_area=pref.getDouble(PREF_LOCATION_MAX_AREA,20.0);
 	}
 
 	private void saveSetting(){
 		pref.putBoolean(PREF_LOCATION_ENABLE,enable);
-		pref.putDouble(PREF_LOCATION_MAX_AREA,max_area);
+//		pref.putDouble(PREF_LOCATION_MAX_AREA,max_area);
 	}
 
 	private LocationData loadData(Context context, int index){

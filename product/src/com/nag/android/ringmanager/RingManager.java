@@ -19,7 +19,8 @@ public class RingManager implements OnLocationCollectedListener{
 //	private final String PREF_STATUS = "status";
 	private static final String PREF_FREQUENCY = "frequency";
 	private static final String PREF_PRIORITY = "priority";
-	private static final String PREF_MAX_ACCURACY = "fineness";
+	private static final String PREF_MAX_AREA_4_ENTRY = "entry";
+	private static final String PREF_MAX_AREA_4_CHECKING = "checking";
 	public static final String RING_MANAGER_STATUS_CHANGED="ring manager status changed";
 
 	private final PreferenceHelper pref;
@@ -35,7 +36,8 @@ public class RingManager implements OnLocationCollectedListener{
 	private int frequency=1;
 	private STATUS status=null;
 //	private STATUS sub_status=null;
-	private double max_accuracy=1500.0;
+	private double max_area_4_checking;
+	private double max_area_4_entry;
 	private boolean auto;
 	private boolean resetauto;
 
@@ -80,14 +82,16 @@ public class RingManager implements OnLocationCollectedListener{
 		set(this.getDeviceStatus());
 		this.frequency=pref.getInt(PREF_RING_MANAGER+PREF_FREQUENCY, 1);// TODO test
 		this.priority=PRIORITY.valueOf(pref.getString(PREF_RING_MANAGER+PREF_PRIORITY, PRIORITY.silentfirst.toString()));
-		this.max_accuracy=pref.getDouble(PREF_RING_MANAGER+PREF_MAX_ACCURACY, 1500.0);
+		this.max_area_4_checking=pref.getDouble(PREF_RING_MANAGER+PREF_MAX_AREA_4_CHECKING, 1500.0);
+		this.max_area_4_entry=pref.getDouble(PREF_RING_MANAGER+PREF_MAX_AREA_4_ENTRY, 1500.0);
 	}
 
 	private void save(){
 		pref.putBoolean(PREF_AUTO, auto);
 		pref.putInt(PREF_RING_MANAGER+PREF_FREQUENCY, frequency);
 		pref.putString(PREF_RING_MANAGER+PREF_PRIORITY, priority.toString());
-		pref.putDouble(PREF_RING_MANAGER+PREF_MAX_ACCURACY, max_accuracy);
+		pref.putDouble(PREF_RING_MANAGER+PREF_MAX_AREA_4_CHECKING, max_area_4_checking);
+		pref.putDouble(PREF_RING_MANAGER+PREF_MAX_AREA_4_ENTRY, max_area_4_entry);
 	}
 
 	public boolean isAuto(){
@@ -135,12 +139,21 @@ public class RingManager implements OnLocationCollectedListener{
 		save();
 	}
 
-	public double getMaxAccuracy(){
-		return max_accuracy;
+	public double getMaxArea4Checking(){
+		return max_area_4_checking;
 	}
 
-	public void setMaxAccuracy(double max_accuracy){
-		this.max_accuracy=max_accuracy;
+	public void setMaxArea4Checking(double max_accuracy){
+		this.max_area_4_checking=max_accuracy;
+		save();
+	}
+
+	public double getMaxArea4Entry(){
+		return max_area_4_entry;
+	}
+
+	public void setMaxArea4Entry(double max_accuracy){
+		this.max_area_4_checking=max_area_4_entry;
 		save();
 	}
 
@@ -230,10 +243,10 @@ public class RingManager implements OnLocationCollectedListener{
 		}
 	}
 
-	void doAuto(Context context){//TODO lock
+	public void doAuto(Context context){//TODO lock
 		if(isAuto()){
 			if(locationsetting.getEnable()){
-				new LocationHelper(context).start(false, max_accuracy, MAX_COUNT, this);
+				new LocationHelper(context).start(false, max_area_4_checking, MAX_COUNT, this);
 			}else{
 				resolveStatus(context, pickStatus(STATUS.uncontrol, schedulesetting.getStatus()));
 			}

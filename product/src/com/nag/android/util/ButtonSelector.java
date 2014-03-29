@@ -12,12 +12,9 @@ import android.view.View.OnClickListener;;
 
 public class ButtonSelector<T> extends Button implements OnClickListener {
 
-	public interface OnValueChangedListener<T>{
-		String OnValueChanged(T value);
-	}
-
 	private OnValueChangedListener<T> listener=null;
 	private String title;
+	private String default_label="";
 	private int index=0;
 	private final ArrayList<PrimitiveLabel<T>> labels=new ArrayList<PrimitiveLabel<T>>();;
 
@@ -30,9 +27,16 @@ public class ButtonSelector<T> extends Button implements OnClickListener {
 		labels.add(label);
 	}
 
-	public void setTitle(String title){
+	public ButtonSelector<T> setTitle(String title){
 		this.title=title;
+		return this;
 	}
+	
+	public ButtonSelector<T> setDefaultLabel(String default_label){
+		this.default_label=default_label;;
+		return this;
+	}
+	
 	public void setOnValueChangedListener(OnValueChangedListener<T> listener){
 		this.listener=listener;
 	}
@@ -49,18 +53,22 @@ public class ButtonSelector<T> extends Button implements OnClickListener {
 				return;
 			}
 		}
-		throw new RuntimeException();
+		setText(default_label);
+	}
+
+	ButtonSelector<T> getInstance(){
+		return this;
 	}
 
 	@Override
 	public void onClick(View v) {
-		new AlertDialog.Builder(getContext()).setTitle(title).setSingleChoiceItems(labels.toArray(new CharSequence[0]),1
+		new AlertDialog.Builder(getContext()).setTitle(title).setSingleChoiceItems(labels.toArray(new CharSequence[0]),index
 				, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which){
 				index=which;
 				if(listener!=null){
-					setText(listener.OnValueChanged(labels.get(index).getValue()));
+					setText(listener.OnValueChanged(getInstance(), labels.get(index).getValue()));
 				}else{
 					setText(labels.get(index).toString());
 				}

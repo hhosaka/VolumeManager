@@ -55,6 +55,11 @@
         </EditText>
 
         <CheckBox
+            android:id="@+id/checkBoxResetAutoMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Reset Auto Mode" />
+        <CheckBox
             android:id="@+id/checkBoxPreventSilentMode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -79,14 +84,14 @@
                 android:text="OK" />
 
             <Button
-                android:id="@+id/ButtonCancel"
+                android:id="@+id/buttonCancel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Cancel" />
 
             <Button
-                android:id="@+id/ButtonDefault"
+                android:id="@+id/buttonDefault"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

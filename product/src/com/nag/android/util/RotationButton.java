@@ -10,9 +10,9 @@ import android.view.View.OnClickListener;;
 
 public class RotationButton<T> extends Button implements OnClickListener {
 
-	public interface OnValueChangedListener<T>{
-		void OnValueChanged(T value);
-	}
+//	public interface OnValueChangedListener<T>{
+//		void OnValueChanged(T value);
+//	}
 
 	private OnValueChangedListener<T> listener=null;
 	private int index=0;
@@ -50,6 +50,6 @@ public class RotationButton<T> extends Button implements OnClickListener {
 	public void onClick(View v) {
 		PrimitiveLabel<T>label=labels.get(index=++index%labels.size());
 		setText(label.toString());
-		if(listener!=null)listener.OnValueChanged(label.getValue());
+		if(listener!=null)listener.OnValueChanged(getTag(), label.getValue());
 	}
 }

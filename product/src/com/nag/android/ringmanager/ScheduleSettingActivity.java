@@ -4,8 +4,8 @@ import com.nag.android.ringmanager.RingManager.STATUS;
 import com.nag.android.ringmanager.ScheduleSetting.Day;
 import com.nag.android.ringmanager.controls.StatusLabel;
 import com.nag.android.ringmanager.controls.StatusSelector;
-import com.nag.android.util.PrimitiveLabel;
-import com.nag.android.util.PrimitiveSelector.OnSelectedListener;
+import com.nag.android.util.ButtonSelector;
+import com.nag.android.util.OnValueChangedListener;
 
 
 import android.app.ProgressDialog;
@@ -27,9 +27,17 @@ import android.widget.TextView;
 
 public class ScheduleSettingActivity extends FragmentActivity {
 	private static String ARG_DAY="arg_day";
-	private static final String[] labelDays={"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Everyday"};
+	private static final int[] labelDays=
+		{R.string.label_day_sunday
+		,R.string.label_day_monday
+		,R.string.label_day_tueday
+		,R.string.label_day_wednesday
+		,R.string.label_day_thursday
+		,R.string.label_day_friday
+		,R.string.label_day_satueday
+		,R.string.label_day_everyday};
 	private ScheduleSetting setting=null;
-	private static ProgressDialog dlg=null;
+	private static ProgressDialog progressdialog=null;
 
 	SectionsPagerAdapter mSectionsPagerAdapter;
 	
@@ -54,19 +62,19 @@ public class ScheduleSettingActivity extends FragmentActivity {
 	@Override
 	protected void onResume(){
 		super.onResume();
-		if(dlg!=null){
-			dlg.dismiss();
-			dlg=null;
+		if(progressdialog!=null){
+			progressdialog.dismiss();
+			progressdialog=null;
 		}
 	}
 
 	public static void showProgressDialog(Context context){
-		dlg=new ProgressDialog(context);
-		dlg.setTitle("Searching...");
-		dlg.setMessage("Please wait for finish searching");
-		dlg.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-		dlg.setCancelable(false);
-		dlg.show();
+		progressdialog=new ProgressDialog(context);
+		progressdialog.setTitle("Searching...");
+		progressdialog.setMessage("Please wait for finish searching");
+		progressdialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		progressdialog.setCancelable(false);
+		progressdialog.show();
 	}
 
 	@Override
@@ -88,7 +96,7 @@ public class ScheduleSettingActivity extends FragmentActivity {
 
 		@Override
 		public Fragment getItem(int position) {
-			Fragment fragment = new DummySectionFragment();
+			Fragment fragment = new InternalFragment();
 			Bundle args=new Bundle();
 			args.putInt(ARG_DAY, position);
 			fragment.setArguments(args);
@@ -102,7 +110,7 @@ public class ScheduleSettingActivity extends FragmentActivity {
 
 		@Override
 		public CharSequence getPageTitle(int position) {
-			return labelDays[position];
+			return getString(labelDays[position]);
 		}
 	}
 
@@ -110,14 +118,12 @@ public class ScheduleSettingActivity extends FragmentActivity {
 	 * A dummy fragment representing a section of the app, but that simply
 	 * displays dummy text.
 	 */
-	public static class DummySectionFragment extends Fragment {
-		private static final int INITIAL_POSITION = 8;
+	public static class InternalFragment extends Fragment {
+		private static final int INITIAL_HOUR = 8;
 
 		private int day;
 
-		public static final String ARG_SECTION_NUMBER = "section_number";
-
-		public DummySectionFragment(){
+		public InternalFragment(){
 		}
 
 		public void setArguments(Bundle args){
@@ -135,60 +141,61 @@ public class ScheduleSettingActivity extends FragmentActivity {
 			InternalAdapter adapter=new InternalAdapter(getActivity(), getSetting().getSchedule(day), getSetting().getInitialState(day));
 			ListView lv =((ListView)rootView.findViewById(R.id.listViewLocation));
 			lv.setAdapter(adapter);
-			lv.setSelection(INITIAL_POSITION);
+			lv.setSelection(INITIAL_HOUR);
 			return rootView;
 		}
 
-		class InternalAdapter extends BaseAdapter implements OnSelectedListener<STATUS>{
+		class InternalAdapter extends BaseAdapter implements OnValueChangedListener<STATUS>{//OnSelectedListener<STATUS>{
 			private final LayoutInflater inflater;
-			private final STATUS prev;
 			private final Day day;
 			private final StatusLabel labelEnable=new StatusLabel(STATUS.enable.toString(), STATUS.enable);
 			private final StatusLabel labelManner=new StatusLabel(STATUS.manner.toString(), STATUS.manner);
 			private final StatusLabel labelSilent=new StatusLabel(STATUS.silent.toString(), STATUS.silent);
 			private final StatusLabel labelUncontrol=new StatusLabel(STATUS.uncontrol.toString(), STATUS.uncontrol);
-			private final StatusLabel labelNA=new LabelNA();
-			class Holder{
-				private int index;
-				Holder(int index){
-					this.index=index;
-				}
-				STATUS get(){
-					return day.get(index);
-				}
-				STATUS set(STATUS status){
-					day.set(index, status);
-					return day.get(index);
-				}
-			}
+//			private final StatusLabel labelFollow=new StatusLabel(STATUS.follow.toString(), STATUS.follow);
+//			private final StatusLabel labelNA=new LabelNA();
+//			class Holder{
+//				private int index;
+//				Holder(int index){
+//					this.index=index;
+//				}
+//				STATUS get(){
+//					return day.get(index);
+//				}
+//				STATUS set(STATUS status){
+//					day.set(index, status);
+//					return day.get(index);
+//				}
+//			}
 
-			class LabelNA extends StatusLabel{
-				public LabelNA(){
-					super("na", STATUS.na);
-				}
-				public boolean isEnable(){
-					return false;
-				}
-			}
-			class LabelFollow extends PrimitiveLabel<STATUS>
+//			class LabelNA extends StatusLabel{
+//				public LabelNA(){
+//					super("na", STATUS.na);
+//				}
+//				public boolean isEnable(){
+//					return false;
+//				}
+//			}
+			class LabelFollow extends StatusLabel
 			{
-				private int index;
+				private int hour;
 				LabelFollow()
 				{
-					super(STATUS.follow);
+					super("Follow", STATUS.follow);// TODO
 				}
 
 				STATUS getSubStatus(){
+					return day.resolveStatus(hour);
 //					return day.get(index);
-					for(int i=index-1; i>=0; --i){
-						if(day.get(i)!=STATUS.follow){
-							return day.get(i);
-						}
-					}
-					return prev;
+//					for(int i=index-1; i>=0; --i){
+//						if(day.get(i)!=STATUS.follow){
+//							return day.get(i);
+//						}
+//					}
+//					return prev;
 				}
 				public void setIndex(int index){
-					this.index=index;
+					this.hour=index;
 				}
 				public String toString(){
 					return STATUS.follow+"("+getSubStatus()+")";
@@ -198,7 +205,7 @@ public class ScheduleSettingActivity extends FragmentActivity {
 			public InternalAdapter(Context context,Day statuslist, STATUS prev) {
 				this.inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 				this.day=statuslist;
-				this.prev=prev;
+//				this.prev=prev;
 			}
 
 			@Override
@@ -210,25 +217,25 @@ public class ScheduleSettingActivity extends FragmentActivity {
 					selector.add(labelManner);
 					selector.add(labelSilent);
 					selector.add(labelUncontrol);
-					LabelFollow tag=new LabelFollow();
-					selector.add(tag);
-					convertView.setTag(tag);
-					selector.add(labelNA);
+					LabelFollow labelfollow=new LabelFollow();
+					selector.add(labelfollow);
+					convertView.setTag(labelfollow);
 				}
 				((TextView)convertView.findViewById(R.id.textHour)).setText(position+getString(R.string.label_time_postfix));
 				StatusSelector selector=((StatusSelector)convertView.findViewById(R.id.buttonStatus));
 				selector.setStatus(day.get(position));
-				selector.setOnSelectedListener(this);
-				selector.setTag(new Holder(position));
+				selector.setOnValueChangedListener(this);
+				selector.setTag(Integer.valueOf(position));
 				((LabelFollow)convertView.getTag()).setIndex(position);
-//				((LabelFollow)selector.getItemAtPosition(POSITION_LABEL_FOLLOW)).setSubStatus(STATUS.enable);// TODO
 				return convertView;
 			}
 
 			@Override
-			public void OnSelected(View parent, STATUS status) {
-				((Holder)parent.getTag()).set(status);
+//			public void OnSelected(View parent, STATUS status) {
+			public String OnValueChanged(ButtonSelector<STATUS>parent, STATUS status) {
+				day.set(((Integer)parent.getTag()).intValue(),status);
 				this.notifyDataSetChanged();
+				return "temp";//status.toString();
 			}
 
 			@Override

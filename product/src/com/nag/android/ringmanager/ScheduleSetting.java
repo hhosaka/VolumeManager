@@ -3,7 +3,6 @@ package com.nag.android.ringmanager;
 import java.util.Calendar;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.nag.android.ringmanager.RingManager.STATUS;
 import com.nag.android.util.PreferenceHelper;
@@ -13,7 +12,7 @@ public class ScheduleSetting {
 		public STATUS get(int hour);
 		public void set(int hour, STATUS status);
 		public int size();
-		public STATUS getResolvedStatus(int hour);
+		public STATUS resolveStatus(int hour);
 	}
 
 	public class WeekDay implements Day{
@@ -24,13 +23,24 @@ public class ScheduleSetting {
 		public STATUS get(int hour){return schedules[day][hour];}
 		public void set(int hour, STATUS status){schedules[day][hour]=status;}
 		public int size(){return HOUR_OF_A_DAY;}
-		public STATUS getResolvedStatus(int hour){
+		public STATUS resolveStatus(int hour){
 			return ScheduleSetting.this.resolveStatus(day, hour);
 		}
 	}
 
 	public class EveryDay implements Day{
+		STATUS[]data=new STATUS[HOUR_OF_A_DAY];
+		EveryDay(){
+			for(int i=0;i<HOUR_OF_A_DAY;++i){
+				data[i]=getInitial(i);
+			}
+		}
+		@Override
 		public STATUS get(int hour){
+			return data[hour];
+		}
+
+		private STATUS getInitial(int hour){
 //			Log.d("H:","H:"+hour);
 			STATUS ret=schedules[0][hour];
 			for(int i=1;i<DAY_OF_A_WEEK;++i){
@@ -40,22 +50,24 @@ public class ScheduleSetting {
 			}
 			return ret;
 		}
+
 		public void set(int hour, STATUS status){
+			data[hour]=status;
 			for(int i=1;i<DAY_OF_A_WEEK;++i){
 				schedules[i][hour]=status;
 			}
 		}
 
-		public STATUS getResolvedStatus(int hour){
-			for(int i=0;i<HOUR_OF_A_DAY;++i){
-				STATUS status=get((HOUR_OF_A_DAY+hour+i)%HOUR_OF_A_DAY);
+		public STATUS resolveStatus(int hour){
+			for(int i=1;i<HOUR_OF_A_DAY;++i){
+				STATUS status=data[(HOUR_OF_A_DAY+hour-i)%HOUR_OF_A_DAY];
 				if(status!=STATUS.follow&&status!=STATUS.na){
 					return status;
 				}
 			}
 			return STATUS.follow;
 		}
-		public int size(){return DAY_OF_A_WEEK;}
+		public int size(){return HOUR_OF_A_DAY;}
 	}
 
 	static final int HOUR_OF_A_DAY=24;

@@ -16,6 +16,7 @@ public class RingManager implements OnLocationCollectedListener{
 	private static final int MAX_COUNT = 10;
 	private static final String PREF_RING_MANAGER = "pref_ring_manager_";
 	private static final String PREF_AUTO = "auto";
+	private static final String PREF_NO_SILENT = "no_silent";
 //	private final String PREF_STATUS = "status";
 	private static final String PREF_FREQUENCY = "frequency";
 	private static final String PREF_PRIORITY = "priority";
@@ -40,6 +41,7 @@ public class RingManager implements OnLocationCollectedListener{
 	private double max_area_4_entry;
 	private boolean auto;
 	private boolean resetauto;
+	private boolean nosilent;
 
 	private STATUS get(){
 		return status;
@@ -79,6 +81,7 @@ public class RingManager implements OnLocationCollectedListener{
 
 	private void load(){
 		auto=pref.getBoolean(PREF_AUTO, false);
+		nosilent=pref.getBoolean(PREF_NO_SILENT, false);
 		set(this.getDeviceStatus());
 		this.frequency=pref.getInt(PREF_RING_MANAGER+PREF_FREQUENCY, 1);// TODO test
 		this.priority=PRIORITY.valueOf(pref.getString(PREF_RING_MANAGER+PREF_PRIORITY, PRIORITY.silentfirst.toString()));
@@ -86,8 +89,9 @@ public class RingManager implements OnLocationCollectedListener{
 		this.max_area_4_entry=pref.getDouble(PREF_RING_MANAGER+PREF_MAX_AREA_4_ENTRY, 1500.0);
 	}
 
-	private void save(){
+	void save(){
 		pref.putBoolean(PREF_AUTO, auto);
+		pref.putBoolean(PREF_NO_SILENT, nosilent);
 		pref.putInt(PREF_RING_MANAGER+PREF_FREQUENCY, frequency);
 		pref.putString(PREF_RING_MANAGER+PREF_PRIORITY, priority.toString());
 		pref.putDouble(PREF_RING_MANAGER+PREF_MAX_AREA_4_CHECKING, max_area_4_checking);
@@ -102,6 +106,15 @@ public class RingManager implements OnLocationCollectedListener{
 		this.priority=priority;
 		save();
 		doAuto(context);
+	}
+
+	public boolean getNoSilent(){
+		return nosilent;
+	}
+
+	public void setNoSilent(boolean value){
+		nosilent=value;
+//		save();
 	}
 
 	public boolean getEnableLocation(){
@@ -136,7 +149,7 @@ public class RingManager implements OnLocationCollectedListener{
 
 	public void setFrequency(int frequency){
 		this.frequency=frequency;
-		save();
+//		save();
 	}
 
 	public double getMaxArea4Checking(){
@@ -145,7 +158,7 @@ public class RingManager implements OnLocationCollectedListener{
 
 	public void setMaxArea4Checking(double max_accuracy){
 		this.max_area_4_checking=max_accuracy;
-		save();
+//		save();
 	}
 
 	public double getMaxArea4Entry(){
@@ -154,7 +167,7 @@ public class RingManager implements OnLocationCollectedListener{
 
 	public void setMaxArea4Entry(double max_accuracy){
 		this.max_area_4_checking=max_area_4_entry;
-		save();
+//		save();
 	}
 
 	public boolean getResetAuto(){
@@ -163,7 +176,7 @@ public class RingManager implements OnLocationCollectedListener{
 
 	public void setResetAuto(boolean resetauto){
 		this.resetauto=resetauto;
-		save();
+//		save();
 	}
 
 	public STATUS getStatus(){

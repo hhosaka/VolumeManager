@@ -12,8 +12,9 @@ import com.nag.android.ringmanager.RingManager;
 import com.nag.android.ringmanager.RingManager.STATUS;
 import com.nag.android.ringmanager.SmartTimerReceiver;
 import com.nag.android.util.ButtonSelector;
+import com.nag.android.util.OnValueChangedListener;
 
-public class SmartTimerSelector extends ButtonSelector<Integer> implements com.nag.android.util.ButtonSelector.OnValueChangedListener<Integer>{
+public class SmartTimerSelector extends ButtonSelector<Integer> implements OnValueChangedListener<Integer>{
 
 	public SmartTimerSelector(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -22,14 +23,14 @@ public class SmartTimerSelector extends ButtonSelector<Integer> implements com.n
 	public void setTime(Integer hour){
 		super.setValue(hour);
 	}
+
 	@Override
-	public String OnValueChanged(Integer value) {
+	public String OnValueChanged(ButtonSelector<Integer>parent, Integer value) {
 		if(value==0){
 			SmartTimerReceiver.stop(getContext());
 			RingManager.getInstance(getContext()).doAuto(getContext());
 			return "Smart Timer";
-		}
-		else{
+		}else{
 			RingManager.getInstance(getContext()).setStatus(getContext(),STATUS.silent);
 			Calendar t=Calendar.getInstance();
 			t.add(Calendar.MINUTE, value);

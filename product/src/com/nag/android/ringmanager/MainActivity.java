@@ -5,9 +5,9 @@ import com.nag.android.ringmanager.RingManager.STATUS;
 import com.nag.android.ringmanager.controls.PrioritySelector;
 import com.nag.android.ringmanager.controls.SmartTimerSelector;
 import com.nag.android.ringmanager.controls.StatusRotationButton;
+import com.nag.android.util.ButtonSelector;
 import com.nag.android.util.Label;
-import com.nag.android.util.PrimitiveSelector.OnSelectedListener;
-import com.nag.android.util.RotationButton.OnValueChangedListener;
+import com.nag.android.util.OnValueChangedListener;
 import com.nag.android.ringmanager.R;
 
 import android.media.AudioManager;
@@ -101,9 +101,11 @@ public class MainActivity extends Activity{
 		btnStatus.add(new AutoLabel(getString(R.string.label_auto), STATUS.auto));
 		btnStatus.setValue(ringmanager.getStatus());
 		btnStatus.setOnValueChangedListener(new OnValueChangedListener<STATUS>(){
+
 			@Override
-			public void OnValueChanged(STATUS value) {
+			public String OnValueChanged(ButtonSelector<STATUS> parent, STATUS value) {
 				ringmanager.setStatus(MainActivity.this,value);
+				return "";
 			}
 		});
 	}
@@ -157,10 +159,16 @@ public class MainActivity extends Activity{
 		sp.add(new Label<PRIORITY>(getString(R.string.label_ringfirst),PRIORITY.ringfirst));
 		sp.add(new Label<PRIORITY>(getString(R.string.label_silentfirst),PRIORITY.silentfirst));
 		sp.setPriority(ringmanager.getPriority());
-		sp.setOnSelectedListener(new OnSelectedListener<PRIORITY>(){
+		sp.setOnValueChangedListener(new OnValueChangedListener<PRIORITY>(){
+//			@Override
+//			public void OnSelected(View parent, PRIORITY priority) {
+//				ringmanager.setPriority(getActivity(),(PRIORITY)priority);
+//			}
+
 			@Override
-			public void OnSelected(View parent, PRIORITY priority) {
-				ringmanager.setPriority(getActivity(),(PRIORITY)priority);
+			public String OnValueChanged(ButtonSelector<PRIORITY> parent, PRIORITY value) {
+				ringmanager.setPriority(getActivity(),(PRIORITY)value);
+				return value.toString();
 			}
 		});
 	}

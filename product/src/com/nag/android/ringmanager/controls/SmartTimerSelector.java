@@ -6,6 +6,7 @@ import android.content.Context;
 
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
+import android.widget.Button;
 
 import com.nag.android.ringmanager.R;
 import com.nag.android.ringmanager.RingManager;
@@ -25,7 +26,7 @@ public class SmartTimerSelector extends ButtonSelector<Integer> implements OnVal
 	}
 
 	@Override
-	public String OnValueChanged(ButtonSelector<Integer>parent, Integer value) {
+	public String OnValueChanged(Button parent, Integer value) {
 		if(value==0){
 			SmartTimerReceiver.stop(getContext());
 			RingManager.getInstance(getContext()).doAuto(getContext());

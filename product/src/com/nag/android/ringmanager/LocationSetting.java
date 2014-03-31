@@ -24,7 +24,6 @@ public class LocationSetting{
 	private static final double MAX_LOCATION=32;
 	private static final String PREF_LOCATION="location_";
 	private static final String PREF_LOCATION_ENABLE="location_enable";
-	private static final String PREF_LOCATION_MAX_AREA="location_max_area";
 
 
 	private final ArrayList<LocationData> locations=new ArrayList<LocationData>();

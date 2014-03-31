@@ -1,5 +1,7 @@
 package com.nag.android.util;
 
+import android.widget.Button;
+
 public interface OnValueChangedListener<T>{
-	String OnValueChanged(ButtonSelector<T> tag, T value);
+	String OnValueChanged(Button button, T value);
 }

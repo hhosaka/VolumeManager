@@ -50,6 +50,6 @@ public class RotationButton<T> extends Button implements OnClickListener {
 	public void onClick(View v) {
 		PrimitiveLabel<T>label=labels.get(index=++index%labels.size());
 		setText(label.toString());
-		if(listener!=null)listener.OnValueChanged(getTag(), label.getValue());
+		if(listener!=null)listener.OnValueChanged((Button)getTag(), label.getValue());
 	}
 }

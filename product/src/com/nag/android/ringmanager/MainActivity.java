@@ -5,7 +5,6 @@ import com.nag.android.ringmanager.RingManager.STATUS;
 import com.nag.android.ringmanager.controls.PrioritySelector;
 import com.nag.android.ringmanager.controls.SmartTimerSelector;
 import com.nag.android.ringmanager.controls.StatusRotationButton;
-import com.nag.android.util.ButtonSelector;
 import com.nag.android.util.Label;
 import com.nag.android.util.OnValueChangedListener;
 import com.nag.android.ringmanager.R;
@@ -22,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ToggleButton;
@@ -41,6 +41,7 @@ public class MainActivity extends Activity{
 				STATUS status=RingManager.convParam2Status(intent.getIntExtra(AudioManager.EXTRA_RINGER_MODE, -1));
 				btnStatus.setValue(ringmanager.confirm(status));
 			}
+			setEnableSubControl();
 		}
 	}
 
@@ -101,9 +102,8 @@ public class MainActivity extends Activity{
 		btnStatus.add(new AutoLabel(getString(R.string.label_auto), STATUS.auto));
 		btnStatus.setValue(ringmanager.getStatus());
 		btnStatus.setOnValueChangedListener(new OnValueChangedListener<STATUS>(){
-
 			@Override
-			public String OnValueChanged(ButtonSelector<STATUS> parent, STATUS value) {
+			public String OnValueChanged(Button parent, STATUS value) {
 				ringmanager.setStatus(MainActivity.this,value);
 				return "";
 			}
@@ -118,6 +118,7 @@ public class MainActivity extends Activity{
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
 				ringmanager.setEnableLocation(isChecked);
 				ringmanager.doAuto(MainActivity.this);
+				setEnableSubControl();
 			}
 		});
 		findViewById(R.id.buttonByLocationSetting).setOnClickListener(new OnClickListener() {
@@ -166,7 +167,7 @@ public class MainActivity extends Activity{
 //			}
 
 			@Override
-			public String OnValueChanged(ButtonSelector<PRIORITY> parent, PRIORITY value) {
+			public String OnValueChanged(Button parent, PRIORITY value) {
 				ringmanager.setPriority(getActivity(),(PRIORITY)value);
 				return value.toString();
 			}
@@ -192,10 +193,11 @@ public class MainActivity extends Activity{
 	}
 
 	private void setEnableSubControl(){
-		boolean value=ringmanager.isAuto();
-		findViewById(R.id.buttonPriority).setEnabled(value);
-		findViewById(R.id.buttonByLocation).setEnabled(value);
-		findViewById(R.id.buttonBySchedule).setEnabled(value);
+//TODO
+//		boolean value=ringmanager.isAuto();
+//		findViewById(R.id.buttonPriority).setEnabled(value);
+//		findViewById(R.id.buttonByLocation).setEnabled(value);
+//		findViewById(R.id.buttonBySchedule).setEnabled(value);
 	}
 
 	@Override

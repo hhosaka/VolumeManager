@@ -5,7 +5,6 @@ import android.location.Location;
 
 import com.nag.android.ringmanager.LocationHelper;
 import com.nag.android.ringmanager.LocationHelper.OnLocationCollectedListener.RESULT;
-import com.nag.android.ringmanager.RingManager.STATUS;
 
 public class MockLocationHelper extends LocationHelper {
 

@@ -4,7 +4,6 @@ import com.nag.android.ringmanager.RingManager.STATUS;
 import com.nag.android.ringmanager.ScheduleSetting.Day;
 import com.nag.android.ringmanager.controls.StatusLabel;
 import com.nag.android.ringmanager.controls.StatusSelector;
-import com.nag.android.util.ButtonSelector;
 import com.nag.android.util.OnValueChangedListener;
 
 
@@ -22,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -232,7 +232,7 @@ public class ScheduleSettingActivity extends FragmentActivity {
 
 			@Override
 //			public void OnSelected(View parent, STATUS status) {
-			public String OnValueChanged(ButtonSelector<STATUS>parent, STATUS status) {
+			public String OnValueChanged(Button parent, STATUS status) {
 				day.set(((Integer)parent.getTag()).intValue(),status);
 				this.notifyDataSetChanged();
 				return "temp";//status.toString();

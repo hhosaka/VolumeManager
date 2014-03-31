@@ -54,11 +54,11 @@ public class LocationSettingActivity extends Activity implements OnLocationColle
 			public void onClick(View v){
 				if(locationsetting.hasSpace()){
 //					LocationCollector.getInstance(getApplicationContext()).start(LocationSettingActivity.this);
-					ProgressDialog dlg=new ProgressDialog(LocationSettingActivity.this);
-					dlg.setTitle("Searching...");
-					dlg.setMessage("Please wait for finish searching");
-					dlg.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-					dlg.setButton(DialogInterface.BUTTON_POSITIVE, "Quit",
+					progress_dialog=new ProgressDialog(LocationSettingActivity.this);
+					progress_dialog.setTitle("Searching...");
+					progress_dialog.setMessage("Please wait for finish searching");
+					progress_dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+					progress_dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Quit",
 							new DialogInterface.OnClickListener() {
 							@Override
 								public void onClick(DialogInterface dialog, int which) {
@@ -66,14 +66,14 @@ public class LocationSettingActivity extends Activity implements OnLocationColle
 										locationhelper.stop();
 										locationhelper=null;
 									}
-									if(LocationSettingActivity.this.progress_dialog!=null){
-										LocationSettingActivity.this.progress_dialog.dismiss();
-										LocationSettingActivity.this.progress_dialog=null;
+									if(dialog!=null){
+										dialog.dismiss();
+										dialog=null;
 									}
 								}
 							});
-					dlg.setCancelable(false);
-					dlg.show();
+					progress_dialog.setCancelable(false);
+					progress_dialog.show();
 
 					locationhelper=new LocationHelper(getApplicationContext());
 					locationhelper.start(true, RingManager.getInstance(getActivity()).getMaxArea4Entry(), MAX_COUNT, LocationSettingActivity.this);
